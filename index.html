@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arbiter GM Dashboard v2.16</title>
+    <title>Arbiter GM Dashboard</title>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Lato:wght@400;700&family=Crimson+Pro:ital,wght@0,400;0,700;1,400&display=swap"
@@ -1903,20 +1903,82 @@ Armor Class 14 (studded leather)
                 document.querySelectorAll('.drag-over-card').forEach(el => el.classList.remove('drag-over-card'));
             },
 
-            // --- EDITOR LOGIC (UPDATED FOR LEGENDARY & CR FIXES) ---
+            duplicateEntity: (type, index) => {
+                const original = State.library[type][index];
+                const duplicate = JSON.parse(JSON.stringify(original));
+                duplicate.id = Date.now();
+                duplicate.name = original.name + " (Copy)";
+                State.library[type].push(duplicate);
+                Storage.save();
+                Render.page();
+                Utils.toast("Entity duplicated!");
+            },
+
+            generateStatblockText: () => {
+                const el = (id) => document.getElementById(id).value;
+                const name = el('edName').toUpperCase() || "UNNAMED ENTITY";
+                const typeAlign = el('edRace') || "Medium humanoid, unaligned";
+                const ac = el('edAC') || 10;
+                const hp = el('edHP') || 10;
+                const speed = el('edSpeed') || "30 ft.";
+
+                const str = el('edStr') || 10;
+                const dex = el('edDex') || 10;
+                const con = el('edCon') || 10;
+                const int = el('edInt') || 10;
+                const wis = el('edWis') || 10;
+                const cha = el('edCha') || 10;
+                const mod = (val) => { const m = Math.floor((val - 10) / 2); return m >= 0 ? `+${m}` : m; };
+
+                const saves = el('edSaves');
+                const skills = el('edSkills');
+                const dmgRes = el('edDmgRes');
+                const dmgImm = el('edDmgImm');
+                const condImm = el('edCondImm');
+                const senses = el('edSenses');
+                const lang = el('edLang');
+                const cr = el('edCR') || "0";
+                const xp = CR_XP[cr] || 0;
+
+                let text = `${name}\n${typeAlign}\n`;
+                text += `Armor Class ${ac}\nHit Points ${hp}\nSpeed ${speed}\n`;
+                text += `STR ${str} (${mod(str)}) DEX ${dex} (${mod(dex)}) CON ${con} (${mod(con)}) INT ${int} (${mod(int)}) WIS ${wis} (${mod(wis)}) CHA ${cha} (${mod(cha)})\n`;
+                
+                if (saves) text += `Saving Throws ${saves}\n`;
+                if (skills) text += `Skills ${skills}\n`;
+                if (dmgRes) text += `Damage Resistances ${dmgRes}\n`;
+                if (dmgImm) text += `Damage Immunities ${dmgImm}\n`;
+                if (condImm) text += `Condition Immunities ${condImm}\n`;
+                if (senses) text += `Senses ${senses}\n`;
+                if (lang) text += `Languages ${lang}\n`;
+                text += `Challenge ${cr} (${xp} XP)\n`;
+
+                const traits = el('edTraits');
+                const actions = el('edActions');
+                const reactions = el('edReactions');
+                const legendary = el('edLegendary');
+
+                if (traits) text += `\n${traits}\n`;
+                if (actions) text += `\nACTIONS\n${actions}\n`;
+                if (reactions) text += `\nREACTIONS\n${reactions}\n`;
+                if (legendary) text += `\nLEGENDARY ACTIONS\n${legendary}\n`;
+
+                return text.trim();
+            },
+
             openEditor: (type, index = null) => {
                 const el = (id) => document.getElementById(id);
                 el('editorModal').classList.add('open');
                 el('edType').value = type;
                 el('edIndex').value = index !== null ? index : -1;
                 el('editorTitle').innerText = index !== null ? "Edit Entity" : `Add New ${type === 'enemies' ? 'Enemy' : 'NPC'}`;
-                el('smartFillText').value = "";
+                
                 Library.switchTab(1);
                 const ent = (index !== null) ? State.library[type][index] : {};
                 const setVal = (id, val) => el(id).value = (val !== undefined && val !== null) ? val : "";
 
                 setVal('edName', ent.name);
-                setVal('edCR', ent.cr || "0"); // Default 0 to avoid blank issues
+                setVal('edCR', ent.cr || "0"); 
                 setVal('edRace', ent.type);
                 setVal('edAC', ent.ac || 10);
                 setVal('edHP', ent.maxHp || ent.hp || 10);
@@ -1939,11 +2001,17 @@ Armor Class 14 (studded leather)
                 setVal('edTraits', ent.traits);
                 setVal('edActions', ent.actions);
                 setVal('edReactions', ent.reactions);
-                setVal('edLegendary', ent.legendary); // NEW FIELD LOAD
+                setVal('edLegendary', ent.legendary); 
                 el('edImgName').innerText = ent.img ? "Has image (Upload to replace)" : "No image selected";
                 el('edImg').value = "";
-            },
 
+                // NEW: Preenche o Smart Fill se o personagem já existir
+                if (index !== null) {
+                    el('smartFillText').value = Library.generateStatblockText();
+                } else {
+                    el('smartFillText').value = "";
+                }
+            },
             saveEntity: () => {
                 const el = (id) => document.getElementById(id);
                 const type = el('edType').value;
@@ -2343,16 +2411,15 @@ Armor Class 14 (studded leather)
                         if (hpPct < 50) barColor = 'rgba(211, 84, 0, 0.4)';
                         if (hpPct < 25) barColor = 'rgba(192, 57, 43, 0.5)';
                         const gradient = `linear-gradient(90deg, ${barColor} ${hpPct}%, transparent ${hpPct}%)`;
-                        const bloodiedClass = (hpPct < 50 && c.hp > 0) ? 'bloodied' : '';
-                        const conds = c.conditions.map(cond => `<span class="cond-tag" onclick="Combat.removeCondition(${c.id}, '${cond}')">${cond} &times;</span>`).join('');
-                        const safeObj = JSON.stringify(c).replace(/"/g, '&quot;');
+                    const bloodiedClass = (hpPct < 50 && c.hp > 0) ? 'bloodied' : '';
+                    const conds = c.conditions.map(cond => `<span class="cond-tag" onclick="Combat.removeCondition(${c.id}, '${cond}')">${cond} &times;</span>`).join('');
 
-                        row.innerHTML = `
+                    row.innerHTML = `
                     <input type="number" value="${c.init}" class="inp" style="text-align:center; border:none; background:transparent; font-weight:bold; font-size:1.5rem; color:var(--accent-primary);" onchange="Combat.update(${c.id}, 'init', this.value); Combat.sort(); Render.page();">
                     <div>
                         <div class="flex-row">
                             <input value="${c.name}" class="inp" style="border:none; background:transparent; font-weight:bold; padding:0; font-size:1rem;" onchange="Combat.update(${c.id}, 'name', this.value)">
-                            <i class="ph ph-eye" style="cursor:pointer; color:var(--accent-primary);" onclick='Render.inspect(${safeObj})'></i>
+                            <i class="ph ph-eye" style="cursor:pointer; color:var(--accent-primary);" onclick="Render.inspect(${c.id})"></i>
                         </div>
                         <div style="margin-top:2px; min-height:20px;">${conds} <i class="ph ph-plus-circle" style="cursor:pointer; font-size:0.8rem; color:#888;" onclick="Render.addConditionPrompt(${c.id})"></i></div>
                     </div>
@@ -2539,11 +2606,12 @@ Armor Class 14 (studded leather)
 
                     card.innerHTML = `
                     <div class="card-head">
-                        <span class="card-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px;">${e.name}</span>
+                        <span class="card-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px;" title="${e.name}">${e.name}</span>
                         <div class="flex-row">
-                            <i class="ph ph-eye" style="cursor:pointer; margin-right:5px;" onclick="Render.inspect('${type}', ${idx})"></i>
-                            <i class="ph ph-pencil-simple" style="cursor:pointer; margin-right:5px;" onclick="Library.openEditor('${type}', ${idx})"></i>
-                            <i class="ph ph-trash" style="cursor:pointer;" onclick="Library.deleteEntity('${type}', ${idx})"></i>
+                            <i class="ph ph-eye" style="cursor:pointer; margin-right:3px;" onclick="Render.inspect('${type}', ${idx})" title="Inspect"></i>
+                            <i class="ph ph-copy" style="cursor:pointer; margin-right:3px;" onclick="Library.duplicateEntity('${type}', ${idx})" title="Duplicate"></i>
+                            <i class="ph ph-pencil-simple" style="cursor:pointer; margin-right:3px;" onclick="Library.openEditor('${type}', ${idx})" title="Edit"></i>
+                            <i class="ph ph-trash" style="cursor:pointer;" onclick="Library.deleteEntity('${type}', ${idx})" title="Delete"></i>
                         </div>
                     </div>
                     ${imgHTML}
@@ -2797,9 +2865,13 @@ Armor Class 14 (studded leather)
             inspect: (entityOrType, idx = null) => {
                 let entity = entityOrType;
 
-                // FIX: If first arg is a string, fetch the entity from the Library state
+                // Fetch from Library if string + index
                 if (typeof entityOrType === 'string' && idx !== null) {
                     entity = State.library[entityOrType][idx];
+                } 
+                // Fetch from combatants if it's an ID (number)
+                else if (typeof entityOrType === 'number') {
+                    entity = State.combatants.find(c => c.id === entityOrType);
                 }
 
                 if (!entity) return; // Safety check
@@ -3091,6 +3163,14 @@ Armor Class 14 (studded leather)
                 }, "Factory Reset");
             }
         };
+        
+        document.getElementById('editorModal').addEventListener('input', (e) => {
+            // Se o usuário digitar em qualquer campo do editor (exceto na própria caixa do Smart Fill)
+            if (e.target.id && e.target.id.startsWith('ed') && e.target.id !== 'edType' && e.target.id !== 'edIndex') {
+                document.getElementById('smartFillText').value = Library.generateStatblockText();
+            }
+        });
+
         // --- INIT ---
         window.onload = async () => {
             await Storage.load(); // Now async to wait for DB images
