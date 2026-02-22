@@ -1,0 +1,3104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbiter GM Dashboard v2.16</title>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Lato:wght@400;700&family=Crimson+Pro:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-body: #f0e6d2;
+            --bg-panel: #fdfbf7;
+            --bg-sidebar: #1e1812;
+            --accent-primary: #8b2e2e;
+            --accent-secondary: #d4a017;
+            --text-dark: #1a1a1a;
+            --text-light: #f5f5f5;
+            --text-muted: #665c54;
+            --border-color: #c0b090;
+            --hp-high: #27ae60;
+            --hp-mid: #d35400;
+            --hp-low: #c0392b;
+            --blue-player: #2980b9;
+            --font-header: 'Cinzel', serif;
+            --font-body: 'Crimson Pro', serif;
+            --font-ui: 'Lato', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-body);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-image: radial-gradient(#dccbb5 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        aside {
+            width: 70px;
+            background-color: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 0;
+            gap: 15px;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: #8a7f70;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .nav-btn i {
+            font-size: 1.8rem;
+            margin-bottom: 2px;
+        }
+
+        .nav-btn span {
+            font-size: 0.6rem;
+            font-family: var(--font-ui);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: var(--accent-primary);
+            color: var(--text-light);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        main {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            gap: 20px;
+            position: relative;
+        }
+
+        .layout-split {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .layout-single {
+            width: 100%;
+            height: 100%;
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: #eae0d0;
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-family: var(--font-header);
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .panel-body {
+            padding: 15px;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+            /* Fixes flex scrolling bug */
+        }
+
+        /* Fix Table Styling & Cropping */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background-color: #f4f0e6;
+            z-index: 1;
+        }
+
+        tbody td {
+            padding: 8px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            vertical-align: top;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Improved Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.05);
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background-color: #f4f0e6;
+            /* Matches theme */
+            z-index: 1;
+        }
+
+        tbody td {
+            padding: 8px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            vertical-align: top;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .btn {
+            background: var(--bg-sidebar);
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-ui);
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: var(--accent-primary);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--text-muted);
+            color: var(--text-dark);
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: var(--text-dark);
+        }
+
+        .btn-danger {
+            background: var(--hp-low);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #a93226;
+        }
+
+        .inp {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--border-color);
+            padding: 5px 8px;
+            font-family: var(--font-ui);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .inp:focus {
+            outline: 2px solid var(--accent-secondary);
+            border-color: transparent;
+            background: #fff;
+        }
+
+        textarea.inp {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .tracker-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .combatant-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 80px 40px;
+            gap: 10px;
+            align-items: center;
+            padding: 8px;
+            background: #fff;
+            border: 1px solid #e0d5c5;
+            border-radius: 6px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .combatant-row.active {
+            border-left: 5px solid var(--accent-primary);
+            background: #fffdf5;
+            box-shadow: 0 2px 8px rgba(139, 46, 46, 0.15);
+            transform: scale(1.005);
+        }
+
+        .combatant-row.player {
+            border-left: 5px solid var(--blue-player);
+        }
+
+        .hp-input {
+            font-weight: bold;
+            text-align: center;
+            border-radius: 4px;
+            padding: 4px;
+            width: 100%;
+            transition: background 0.3s, box-shadow 0.3s;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .bloodied {
+            box-shadow: 0 0 0 2px var(--hp-low) !important;
+            animation: pulseRed 2s infinite;
+        }
+
+        @keyframes pulseRed {
+            0% {
+                border-color: var(--hp-low);
+            }
+
+            50% {
+                border-color: transparent;
+            }
+
+            100% {
+                border-color: var(--hp-low);
+            }
+        }
+
+        .cond-tag {
+            font-size: 0.7rem;
+            background: #ddd;
+            padding: 2px 6px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .cond-tag:hover {
+            background: #c0392b;
+            color: white;
+        }
+
+        .card-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 10px 0;
+            align-items: flex-start;
+        }
+
+        .entity-card {
+            width: 260px;
+            /* Fixed width for card look */
+            height: 400px;
+            /* Fixed height */
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            flex-shrink: 0;
+        }
+
+        .entity-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+        }
+
+        .card-head {
+            padding: 8px 10px;
+            background: var(--bg-sidebar);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .card-title {
+            font-weight: bold;
+            font-family: var(--font-ui);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 180px;
+            /* Taller image area */
+            object-fit: cover;
+            /* Fills the box cleanly */
+            background: #222;
+            cursor: zoom-in;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-stats {
+            padding: 10px;
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            /* Pushes actions to bottom */
+            overflow: hidden;
+        }
+
+        .stat-line {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dotted #eee;
+            padding-bottom: 2px;
+        }
+
+        .card-actions {
+            padding: 8px;
+            background: #f4f0e6;
+            border-top: 1px solid #e0d5c5;
+            margin-top: auto;
+        }
+
+        .dice-area {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .dice-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .die-btn {
+            width: 60px;
+            height: 60px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(145deg, #2c241b, #1a1510);
+            color: var(--accent-secondary);
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s;
+        }
+
+        .die-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .die-btn:hover {
+            background: linear-gradient(145deg, #3a3026, #2c241b);
+        }
+
+        .die-val {
+            font-size: 1.4rem;
+            margin-bottom: 2px;
+        }
+
+        .die-name {
+            font-size: 0.75rem;
+            font-family: var(--font-ui);
+            font-weight: 700;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .log-container {
+            height: 250px;
+            overflow-y: auto;
+            text-align: left;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        .log-entry {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideIn 0.2s ease-out;
+        }
+
+        .log-total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-primary);
+        }
+
+        .log-crit {
+            color: #27ae60;
+            text-shadow: 0 0 5px rgba(39, 174, 96, 0.3);
+        }
+
+        .log-fumble {
+            color: #c0392b;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.open {
+            display: flex;
+            animation: fadeIn 0.2s;
+        }
+
+        .modal-inspect {
+            background: var(--bg-panel);
+            width: 800px;
+            max-width: 95%;
+            max-height: 85vh;
+            display: flex;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+
+        .inspect-img-col {
+            width: 300px;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            position: relative;
+        }
+
+        .inspect-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .inspect-stat-col {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .sb-title {
+            font-family: var(--font-header);
+            font-size: 1.8rem;
+            color: var(--accent-primary);
+            line-height: 1;
+            text-transform: uppercase;
+        }
+
+        .sb-meta {
+            font-style: italic;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .sb-hr {
+            height: 2px;
+            background: var(--accent-primary);
+            margin: 5px 0;
+            border: none;
+        }
+
+        .sb-attr {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin: 10px 0;
+            color: var(--accent-primary);
+        }
+
+        .sb-attr-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sb-attr-val {
+            font-size: 1.2rem;
+        }
+
+        .sb-row {
+            margin-bottom: 3px;
+        }
+
+        .sb-header {
+            font-family: var(--font-header);
+            font-size: 1.3rem;
+            border-bottom: 1px solid #ccc;
+            margin-top: 15px;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .sb-text {
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .pc-sheet .sb-title {
+            color: var(--blue-player);
+        }
+
+        .pc-sheet .sb-hr {
+            background: var(--blue-player);
+        }
+
+        .pc-sheet .sb-attr {
+            color: var(--blue-player);
+        }
+
+        .pc-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .pc-box {
+            background: #f4f8fb;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #dcebf7;
+        }
+
+        .pc-box h4 {
+            margin: 0 0 5px 0;
+            color: var(--blue-player);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid #dcebf7;
+        }
+
+        .dmg-highlight {
+            color: var(--hp-low);
+            font-weight: bold;
+        }
+
+        .atk-highlight {
+            font-weight: bold;
+            color: var(--text-dark);
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0 4px;
+            border-radius: 3px;
+        }
+
+        .trait-name {
+            font-weight: bold;
+            font-style: italic;
+            color: #000;
+        }
+
+        .search-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(2px);
+            z-index: 5000;
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 100px;
+        }
+
+        .search-overlay.open {
+            display: flex;
+            animation: fadeIn 0.15s;
+        }
+
+        .search-box {
+            background: var(--bg-panel);
+            width: 600px;
+            max-width: 90%;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            max-height: 70vh;
+        }
+
+        .search-input-wrap {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+        }
+
+        .search-input {
+            width: 100%;
+            border: none;
+            font-size: 1.2rem;
+            outline: none;
+            font-family: var(--font-ui);
+            background: transparent;
+        }
+
+        .search-results {
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+
+        .search-result-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid transparent;
+            transition: background 0.1s;
+        }
+
+        .search-result-item:hover,
+        .search-result-item.selected {
+            background: #f0e6d2;
+            border-left-color: var(--accent-primary);
+        }
+
+        .result-cat {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .result-name {
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .result-extra {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .dialog-box {
+            background: var(--bg-panel);
+            width: 400px;
+            max-width: 90%;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            animation: slideIn 0.2s ease-out;
+        }
+
+        .dialog-box.editor-box {
+            width: 700px;
+            max-height: 90vh;
+        }
+
+        .dialog-header {
+            background: #eae0d0;
+            padding: 10px 15px;
+            font-family: var(--font-header);
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dialog-body {
+            padding: 20px;
+            font-size: 1rem;
+            color: var(--text-dark);
+            overflow-y: auto;
+        }
+
+        .dialog-footer {
+            padding: 10px 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #f8f8f8;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .dialog-inp {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .form-grid-6 {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+        }
+
+        .tab-nav {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        .tab-btn {
+            padding: 8px 15px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: bold;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .tab-btn.active {
+            border-bottom-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 16px;
+            position: fixed;
+            z-index: 2000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-family: var(--font-ui);
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .text-sm {
+            font-size: 0.8rem;
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadein {
+            from {
+                bottom: 0;
+                opacity: 0;
+            }
+
+            to {
+                bottom: 30px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeout {
+            from {
+                bottom: 30px;
+                opacity: 1;
+            }
+
+            to {
+                bottom: 0;
+                opacity: 0;
+            }
+        }
+
+        /* --- FOLDER & DRAG-DROP STYLES --- */
+        .folder-wrap {
+            border: 1px border var(--border-color);
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 6px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .folder-wrap.drag-over {
+            border: 2px dashed var(--accent-primary);
+            background: rgba(139, 46, 46, 0.05);
+        }
+
+        .folder-header {
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.06);
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            user-select: none;
+        }
+
+        .folder-header:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Updates to Card for Dragging */
+        .entity-card[draggable="true"] {
+            cursor: grab;
+        }
+
+        .entity-card[draggable="true"]:active {
+            cursor: grabbing;
+        }
+
+        .entity-card.drag-over-card {
+            border-top: 3px solid var(--accent-primary);
+            opacity: 0.8;
+        }
+
+        /* Grid adjustments for inside folders */
+        .folder-content {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .folder-content.hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside>
+        <button class="nav-btn" onclick="GlobalSearch.open()" title="Search (Ctrl+K)">
+            <i class="ph ph-magnifying-glass"></i> <span>Search</span>
+        </button>
+        <div style="width:40px; height:1px; background:rgba(255,255,255,0.1); margin:5px 0;"></div>
+
+        <button class="nav-btn active" onclick="Router.go('tracker')" title="Combat Tracker">
+            <i class="ph ph-sword"></i> <span>Combat</span>
+        </button>
+        <button class="nav-btn" onclick="Router.go('library')" title="Enemies & NPCs">
+            <i class="ph ph-skull"></i> <span>Library</span>
+        </button>
+        <button class="nav-btn" onclick="Router.go('party')" title="Party Overview">
+            <i class="ph ph-users-three"></i> <span>Party</span>
+        </button>
+        <button class="nav-btn" onclick="Router.go('setting')" title="Setting Notes">
+            <i class="ph ph-scroll"></i> <span>Setting</span>
+        </button>
+        <button class="nav-btn" onclick="Router.go('dice')" title="Dice Tray">
+            <i class="ph ph-dice-five"></i> <span>Dice</span>
+        </button>
+        <button class="nav-btn" onclick="Router.go('rules')" title="Reference">
+            <i class="ph ph-book-open"></i> <span>Rules</span>
+        </button>
+        <button class="nav-btn" onclick="Router.go('tables')" title="Reference Tables">
+            <i class="ph ph-table"></i> <span>Tables</span>
+        </button>
+        <button class="nav-btn" onclick="Router.go('settings')" title="Settings & Data">
+            <i class="ph ph-gear"></i> <span>System</span>
+        </button>
+    </aside>
+
+    <main id="app"></main>
+
+    <div id="toast">Notification</div>
+
+    <div id="searchOverlay" class="search-overlay" onclick="if(event.target===this) GlobalSearch.close()">
+        <div class="search-box">
+            <div class="search-input-wrap">
+                <i class="ph ph-magnifying-glass" style="font-size:1.5rem; color:#ccc;"></i>
+                <input id="globalSearchInput" class="search-input" placeholder="Search rules, tables, enemies..."
+                    oninput="GlobalSearch.run(this.value)">
+                <div style="font-size:0.8rem; color:#aaa; border:1px solid #ddd; padding:2px 6px; border-radius:4px;">
+                    ESC</div>
+            </div>
+            <div id="searchResults" class="search-results"></div>
+        </div>
+    </div>
+
+    <div id="inspectModal" class="modal" onclick="if(event.target===this) this.classList.remove('open')">
+        <div class="modal-inspect" id="inspectContent"></div>
+    </div>
+
+    <div id="dialogModal" class="modal" style="z-index: 2000;">
+        <div class="dialog-box">
+            <div class="dialog-header">
+                <span id="dialogTitle">Notification</span>
+                <i class="ph ph-x" style="cursor:pointer;" onclick="Dialog.close()"></i>
+            </div>
+            <div class="dialog-body" id="dialogBody"></div>
+            <div class="dialog-footer" id="dialogFooter"></div>
+        </div>
+    </div>
+
+    <div id="editorModal" class="modal" style="z-index: 2100;">
+        <div class="dialog-box editor-box">
+            <div class="dialog-header">
+                <span id="editorTitle">Edit Entity</span>
+                <i class="ph ph-x" style="cursor:pointer;"
+                    onclick="document.getElementById('editorModal').classList.remove('open')"></i>
+            </div>
+            <div class="dialog-body">
+                <input type="hidden" id="edType">
+                <input type="hidden" id="edIndex">
+
+                <div class="tab-nav">
+                    <div class="tab-btn active" onclick="Library.switchTab(0)">Smart Fill</div>
+                    <div class="tab-btn" onclick="Library.switchTab(1)">Main Stats</div>
+                    <div class="tab-btn" onclick="Library.switchTab(2)">Abilities</div>
+                </div>
+
+                <div id="tab-0" class="tab-content active">
+                    <div
+                        style="background:#f0e6d2; padding:10px; margin-bottom:10px; border-radius:4px; font-size:0.85rem;">
+                        Paste a stat block from a PDF or website below to auto-fill the fields.
+                    </div>
+                    <textarea id="smartFillText" class="inp"
+                        style="height:250px; font-family:monospace; font-size:0.8rem;" placeholder="Paste text here...
+Example:
+WHIPSKEIN HORROR
+Medium aberration, any alignment
+Armor Class 14 (studded leather)
+..."></textarea>
+                    <button class="btn w-full" style="margin-top:10px;" onclick="Library.smartParse()">Process
+                        Text</button>
+                </div>
+
+                <div id="tab-1" class="tab-content">
+                    <div class="form-group">
+                        <label class="form-label">Name *</label>
+                        <input id="edName" class="inp" placeholder="e.g. GOBLIN KING" style="text-transform:uppercase;">
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">CR / XP</label>
+                            <select id="edCR" class="inp" style="padding: 6px;">
+                                <option value="0">0</option>
+                                <option value="1/8">1/8</option>
+                                <option value="1/4">1/4</option>
+                                <option value="1/2">1/2</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18</option>
+                                <option value="19">19</option>
+                                <option value="20">20</option>
+                                <option value="21">21</option>
+                                <option value="22">22</option>
+                                <option value="23">23</option>
+                                <option value="24">24</option>
+                                <option value="25">25</option>
+                                <option value="26">26</option>
+                                <option value="27">27</option>
+                                <option value="28">28</option>
+                                <option value="29">29</option>
+                                <option value="30">30</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Type & Align</label>
+                            <input id="edRace" class="inp" placeholder="e.g. Medium Humanoid, LE">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-3">
+                        <div class="form-group"><label class="form-label">AC</label><input id="edAC" type="number"
+                                class="inp"></div>
+                        <div class="form-group"><label class="form-label">HP (Max)</label><input id="edHP" type="number"
+                                class="inp"></div>
+                        <div class="form-group"><label class="form-label">Speed</label><input id="edSpeed" class="inp"
+                                placeholder="30 ft"></div>
+                    </div>
+
+                    <div class="form-label" style="margin-top:5px; text-align:center;">Ability Scores</div>
+                    <div class="form-grid-6" style="margin-bottom:15px;">
+                        <div><label class="form-label" style="text-align:center;">STR</label><input id="edStr"
+                                type="number" class="inp" style="text-align:center;"></div>
+                        <div><label class="form-label" style="text-align:center;">DEX</label><input id="edDex"
+                                type="number" class="inp" style="text-align:center;"></div>
+                        <div><label class="form-label" style="text-align:center;">CON</label><input id="edCon"
+                                type="number" class="inp" style="text-align:center;"></div>
+                        <div><label class="form-label" style="text-align:center;">INT</label><input id="edInt"
+                                type="number" class="inp" style="text-align:center;"></div>
+                        <div><label class="form-label" style="text-align:center;">WIS</label><input id="edWis"
+                                type="number" class="inp" style="text-align:center;"></div>
+                        <div><label class="form-label" style="text-align:center;">CHA</label><input id="edCha"
+                                type="number" class="inp" style="text-align:center;"></div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Init Mod</label><input id="edInit"
+                                type="number" class="inp" placeholder="0"></div>
+                        <div class="form-group"><label class="form-label">Senses</label><input id="edSenses" class="inp"
+                                placeholder="Darkvision 60ft"></div>
+                    </div>
+
+                    <div class="form-group"><label class="form-label">Languages</label><input id="edLang" class="inp">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Image</label>
+                        <input type="file" id="edImg" class="inp" accept="image/*" style="font-size:0.8rem;">
+                        <div id="edImgName" style="font-size:0.7rem; color:#888; margin-top:4px;">No image selected
+                            (keeps existing)</div>
+                    </div>
+                </div>
+
+                <div id="tab-2" class="tab-content">
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Saving Throws</label><input id="edSaves"
+                                class="inp" placeholder="Con +5"></div>
+                        <div class="form-group"><label class="form-label">Skills</label><input id="edSkills" class="inp"
+                                placeholder="Perc +4"></div>
+                    </div>
+                    <div class="form-group"><label class="form-label">Damage Resistances</label><input id="edDmgRes"
+                            class="inp"></div>
+                    <div class="form-group"><label class="form-label">Damage Immunities</label><input id="edDmgImm"
+                            class="inp"></div>
+                    <div class="form-group"><label class="form-label">Condition Immunities</label><input id="edCondImm"
+                            class="inp"></div>
+                    <div class="form-group"><label class="form-label">Additional Feats</label><textarea id="edFeats"
+                            class="inp" style="height:60px;" placeholder="e.g. Sentinel, War Caster..."></textarea>
+                    </div>
+                    <div class="form-group"><label class="form-label">Traits (Passive)</label><textarea id="edTraits"
+                            class="inp" style="height:80px;"></textarea></div>
+                    <div class="form-group"><label class="form-label">Actions</label><textarea id="edActions"
+                            class="inp" style="height:120px;"></textarea></div>
+                    <div class="form-group"><label class="form-label">Reactions</label><textarea id="edReactions"
+                            class="inp" style="height:60px;"></textarea></div>
+                    <div class="form-group"><label class="form-label">Legendary Actions</label><textarea
+                            id="edLegendary" class="inp" style="height:100px;"></textarea></div>
+                </div>
+
+            </div>
+            <div class="dialog-footer">
+                <button class="btn btn-outline"
+                    onclick="document.getElementById('editorModal').classList.remove('open')">Cancel</button>
+                <button class="btn" onclick="Library.saveEntity()">Save Entity</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        // --- INDEXED DB HELPER (Limitless Storage) ---
+        const DBName = "ArbiterDB";
+        const DBStore = "images";
+
+        const DB = {
+            open: () => {
+                return new Promise((resolve, reject) => {
+                    const req = indexedDB.open(DBName, 1);
+                    req.onupgradeneeded = (e) => { e.target.result.createObjectStore(DBStore); };
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            },
+            save: async (id, data) => {
+                if (!data) return;
+                const db = await DB.open();
+                const tx = db.transaction(DBStore, 'readwrite');
+                tx.objectStore(DBStore).put(data, id);
+                return new Promise(resolve => tx.oncomplete = resolve);
+            },
+            get: async (id) => {
+                const db = await DB.open();
+                return new Promise(resolve => {
+                    const req = db.transaction(DBStore, 'readonly').objectStore(DBStore).get(id);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => resolve(null);
+                });
+            },
+            clear: async () => {
+                const db = await DB.open();
+                const tx = db.transaction(DBStore, 'readwrite');
+                tx.objectStore(DBStore).clear();
+                return new Promise(resolve => tx.oncomplete = resolve);
+            }
+        };
+
+        // --- STATE MANAGEMENT ---
+        const State = {
+            combatants: [],
+            library: { enemies: [], npcs: [], folders: [] },
+            encounters: {},
+            party: [],
+            customRules: [], // New: User defined rules
+            customTables: [], // New: User defined tables
+            notes: "",
+            settingNotes: "",
+            turnIndex: -1,
+            encounterTime: 0,
+            round: 1,
+            useMetric: false,
+            isResetting: false
+        };
+
+        // --- UTILS & TOAST ---
+        const Utils = {
+            toast: (msg) => {
+                const x = document.getElementById("toast");
+                x.innerText = msg;
+                x.className = "show";
+                setTimeout(() => { x.className = x.className.replace("show", ""); }, 3000);
+            },
+            parseCR: (cr) => {
+                if (cr === "0") return 0;
+                if (String(cr).includes('/')) {
+                    const [n, d] = cr.split('/');
+                    return parseInt(n) / parseInt(d);
+                }
+                return parseFloat(cr) || 0;
+            },
+            processUnits: (text) => {
+                if (!State.useMetric || !text) return text;
+                return text
+                    .replace(/(\d+)\s?(ft|feet|foot)\b/gi, (m, p1) => (parseFloat(p1) * 0.3).toFixed(1) + "m")
+                    .replace(/(\d+)\s?(miles|mile|mi)\b/gi, (m, p1) => (parseFloat(p1) * 1.6).toFixed(1) + "km")
+                    .replace(/(\d+)\s?(lbs|lb|pounds|pound)\b/gi, (m, p1) => (parseFloat(p1) * 0.5).toFixed(1) + "kg");
+            },
+            mod: (score) => Math.floor((parseInt(score || 10) - 10) / 2),
+            escapeHtml: (text) => {
+                if (!text) return "";
+                return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            }
+        };
+
+        // --- GLOBAL SEARCH ENGINE ---
+        const GlobalSearch = {
+            el: () => document.getElementById('searchOverlay'),
+            input: () => document.getElementById('globalSearchInput'),
+            results: () => document.getElementById('searchResults'),
+
+            open: () => {
+                GlobalSearch.el().classList.add('open');
+                setTimeout(() => GlobalSearch.input().focus(), 100);
+                GlobalSearch.run('');
+            },
+
+            close: () => {
+                GlobalSearch.el().classList.remove('open');
+            },
+
+            run: (query) => {
+                const q = query.toLowerCase();
+                const container = GlobalSearch.results();
+                container.innerHTML = '';
+                const results = [];
+
+                // 1. Search Combatants
+                State.combatants.forEach(c => {
+                    if (c.name.toLowerCase().includes(q)) {
+                        results.push({
+                            cat: 'Active Combat', name: c.name, extra: `HP: ${c.hp}/${c.maxHp}`,
+                            action: () => { Router.go('tracker'); Utils.toast(`Focus: ${c.name}`); }
+                        });
+                    }
+                });
+
+                // 2. Search Library
+                ['enemies', 'npcs'].forEach(type => {
+                    if (State.library[type]) {
+                        State.library[type].forEach((e, idx) => {
+                            if (e.name.toLowerCase().includes(q)) {
+                                results.push({
+                                    cat: `Library (${type})`, name: e.name, extra: `CR ${e.cr} - Click to Add`,
+                                    action: () => {
+                                        Combat.addFromLib(type, idx);
+                                        Router.go('tracker');
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+
+                // 3. Search Party
+                State.party.forEach((p, idx) => {
+                    if (p.name.toLowerCase().includes(q)) {
+                        results.push({
+                            cat: 'Party', name: p.name, extra: `Level ${p.lvl}`,
+                            action: () => {
+                                Combat.add(p.name, 0, p.ac, p.hp, p.maxHp, 'player', 0, null, p);
+                                Router.go('tracker');
+                            }
+                        });
+                    }
+                });
+
+                // 4. Search Tables (Standard + Custom)
+                const allTables = [...State.customTables.map((t, i) => ({ ...t, isCustom: true, idx: i })), ...REFERENCE_TABLES.map((t, i) => ({ ...t, isCustom: false, idx: i }))];
+                allTables.forEach((table) => {
+                    const matchTitle = table.title.toLowerCase().includes(q);
+                    const matchContent = table.rows.flat().some(cell => String(cell).toLowerCase().includes(q));
+
+                    if (matchTitle || matchContent) {
+                        const id = table.isCustom ? `ctbl-${table.idx}` : `tbl-${table.idx}`;
+                        results.push({
+                            cat: table.isCustom ? 'Custom Table' : 'Reference Table',
+                            name: table.title,
+                            extra: 'Click to view',
+                            action: () => {
+                                Router.go('tables');
+                                setTimeout(() => {
+                                    const el = document.getElementById(id);
+                                    if (el) {
+                                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        el.style.borderColor = 'var(--accent-primary)';
+                                    }
+                                }, 100);
+                            }
+                        });
+                    }
+                });
+
+                // 5. Search Rules (Standard + Custom)
+                const allRules = { ...CONDITIONS, ...ACTIONS };
+                State.customRules.forEach(r => allRules[r.name] = r.desc); // Merge for search
+
+                for (const [name, desc] of Object.entries(allRules)) {
+                    if (name.toLowerCase().includes(q) || desc.toLowerCase().includes(q)) {
+                        results.push({
+                            cat: 'Rules', name: name, extra: 'Reference',
+                            action: () => { Router.go('rules'); setTimeout(() => Render.filterRules(name), 100); }
+                        });
+                    }
+                }
+
+                if (results.length === 0) {
+                    container.innerHTML = `<div style="padding:20px; text-align:center; color:#999;">No results found.</div>`;
+                } else {
+                    results.forEach(r => {
+                        const div = document.createElement('div');
+                        div.className = 'search-result-item';
+                        div.innerHTML = `<div><div class="result-cat">${r.cat}</div><div class="result-name">${r.name}</div></div><div class="result-extra">${r.extra}</div>`;
+                        div.onclick = () => { r.action(); GlobalSearch.close(); };
+                        container.appendChild(div);
+                    });
+                }
+            }
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); GlobalSearch.el().classList.contains('open') ? GlobalSearch.close() : GlobalSearch.open(); }
+            if (e.key === 'Escape') { GlobalSearch.close(); document.getElementById('editorModal').classList.remove('open'); }
+        });
+
+        // --- DIALOG SYSTEM ---
+        const Dialog = {
+            el: () => document.getElementById('dialogModal'),
+            close: () => Dialog.el().classList.remove('open'),
+            alert: (msg) => {
+                document.getElementById('dialogTitle').innerText = "Notice";
+                document.getElementById('dialogBody').innerHTML = msg;
+                document.getElementById('dialogFooter').innerHTML = `<button class="btn" onclick="Dialog.close()">OK</button>`;
+                Dialog.el().classList.add('open');
+            },
+            confirm: (msg, onConfirm, title = "Confirm") => {
+                document.getElementById('dialogTitle').innerText = title;
+                document.getElementById('dialogBody').innerHTML = msg;
+                const footer = document.getElementById('dialogFooter');
+                footer.innerHTML = '';
+                const btnCancel = document.createElement('button');
+                btnCancel.className = 'btn btn-outline'; btnCancel.innerText = 'Cancel'; btnCancel.onclick = Dialog.close;
+                const btnOk = document.createElement('button');
+                btnOk.className = 'btn'; btnOk.innerText = 'Confirm'; btnOk.onclick = () => { onConfirm(); Dialog.close(); };
+                footer.append(btnCancel, btnOk);
+                Dialog.el().classList.add('open');
+            },
+            custom: (html, onConfirm, title = "System") => {
+                document.getElementById('dialogTitle').innerText = title;
+                document.getElementById('dialogBody').innerHTML = html;
+                const footer = document.getElementById('dialogFooter');
+                footer.innerHTML = '';
+                const btnCancel = document.createElement('button');
+                btnCancel.className = 'btn btn-outline'; btnCancel.innerText = 'Cancel'; btnCancel.onclick = Dialog.close;
+                const btnOk = document.createElement('button');
+                btnOk.className = 'btn'; btnOk.innerText = 'Save'; btnOk.onclick = () => { if (onConfirm()) Dialog.close(); };
+                footer.append(btnCancel, btnOk);
+                Dialog.el().classList.add('open');
+            },
+            prompt: (msg, onResult) => {
+                document.getElementById('dialogTitle').innerText = "Input";
+                document.getElementById('dialogBody').innerHTML = `<p>${msg}</p><input id="promptInput" class="dialog-inp" autofocus>`;
+                const footer = document.getElementById('dialogFooter');
+                footer.innerHTML = '';
+                const btnOk = document.createElement('button');
+                btnOk.className = 'btn'; btnOk.innerText = 'OK';
+                btnOk.onclick = () => { const val = document.getElementById('promptInput').value; if (val) onResult(val); Dialog.close(); };
+                footer.append(btnOk);
+                Dialog.el().classList.add('open');
+                setTimeout(() => document.getElementById('promptInput').focus(), 100);
+            }
+        };
+
+        // --- ROUTER ---
+        const Router = {
+            current: 'tracker',
+            go: (route) => {
+                Router.current = route;
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                const iconMap = { 'tracker': 'ph-sword', 'library': 'ph-skull', 'party': 'ph-users-three', 'setting': 'ph-scroll', 'dice': 'ph-dice-five', 'rules': 'ph-book-open', 'tables': 'ph-table', 'settings': 'ph-gear' };
+                const iconClass = iconMap[route];
+                if (iconClass) {
+                    const btnIcon = document.querySelector(`.nav-btn i.ph.${iconClass}`);
+                    if (btnIcon && btnIcon.parentElement) btnIcon.parentElement.classList.add('active');
+                }
+                Render.page();
+            }
+        };
+
+        // --- DATA PERSISTENCE (ASYNC) ---
+        const Storage = {
+            save: async () => {
+                if (State.isResetting) return;
+
+                // Clone state to separate images
+                const cleanState = JSON.parse(JSON.stringify(State));
+
+                const processList = async (list) => {
+                    if (!list) return;
+                    for (let item of list) {
+                        if (item.img && item.img.startsWith('data:image')) {
+                            // Save heavy image to DB
+                            await DB.save(`img_${item.id}`, item.img);
+                            // Replace in LS with a reference flag
+                            item.img = `DB:img_${item.id}`;
+                        }
+                    }
+                };
+
+                await processList(cleanState.combatants);
+                await processList(cleanState.library.enemies);
+                await processList(cleanState.library.npcs);
+                await processList(cleanState.party);
+
+                // Capture textareas explicitly
+                cleanState.notes = document.getElementById('scratchpad') ? document.getElementById('scratchpad').value : State.notes;
+                cleanState.settingNotes = document.getElementById('settingPad') ? document.getElementById('settingPad').value : State.settingNotes;
+
+                try {
+                    localStorage.setItem('arbiter_state', JSON.stringify(cleanState));
+                } catch (e) {
+                    Utils.toast("Storage Full: Text data too large.");
+                }
+            },
+
+            load: async () => {
+                const dataStr = localStorage.getItem('arbiter_state');
+                if (dataStr) {
+                    const data = JSON.parse(dataStr);
+
+                    // Rehydrate images from DB
+                    const hydrate = async (list) => {
+                        if (!list) return [];
+                        for (let item of list) {
+                            if (item.img && item.img.startsWith('DB:')) {
+                                const key = item.img.split(':')[1];
+                                const blob = await DB.get(key);
+                                item.img = blob || null;
+                            }
+                        }
+                        return list;
+                    };
+
+                    State.combatants = await hydrate(data.combatants || []);
+                    State.library = data.library || { enemies: [], npcs: [], folders: [] };
+                    if (!State.library.folders) State.library.folders = [];
+                    if (State.library.enemies) await hydrate(State.library.enemies);
+                    if (State.library.npcs) await hydrate(State.library.npcs);
+                    State.party = await hydrate(data.party || []);
+
+                    State.encounters = data.encounters || {};
+                    State.customRules = data.customRules || [];
+                    State.customTables = data.customTables || [];
+                    State.notes = data.notes || "";
+                    State.settingNotes = data.settingNotes || "";
+                    State.useMetric = data.useMetric || false;
+                }
+            }
+        };
+        // --- CUSTOM CONTENT LOGIC ---
+        const CustomContent = {
+            // --- RULES LOGIC ---
+            addRule: (presetName = "", presetCat = "", presetDesc = "") => {
+                const html = `
+                <div class="form-group"><label class="form-label">Rule Name</label><input id="newRuleName" class="inp" value="${Utils.escapeHtml(presetName)}"></div>
+                <div class="form-group"><label class="form-label">Category</label><input id="newRuleCat" class="inp" value="${Utils.escapeHtml(presetCat)}" placeholder="e.g. Conditions, Actions, House Rules"></div>
+                <div class="form-group"><label class="form-label">Description (HTML allowed)</label><textarea id="newRuleDesc" class="inp" style="height:150px;">${presetDesc}</textarea></div>`;
+
+                Dialog.custom(html, () => {
+                    const name = document.getElementById('newRuleName').value.trim();
+                    const cat = document.getElementById('newRuleCat').value.trim();
+                    const desc = document.getElementById('newRuleDesc').value.trim();
+                    if (!name) return false;
+
+                    // Remove existing custom rule with same name (Update logic)
+                    const idx = State.customRules.findIndex(r => r.name === name);
+                    if (idx > -1) State.customRules.splice(idx, 1);
+
+                    State.customRules.push({ id: Date.now(), name, cat, desc });
+                    State.customRules.sort((a, b) => a.name.localeCompare(b.name));
+                    Storage.save();
+                    // Refresh current view if we are on rules
+                    if (Router.current === 'rules') Render.page();
+                    return true;
+                }, "Edit/Add Rule");
+            },
+
+            editBuiltInRule: (cat, name) => {
+                // Fetch text from the constants
+                const data = (cat === 'Conditions' ? CONDITIONS : ACTIONS)[name];
+                // Open the Add Rule dialog pre-filled
+                CustomContent.addRule(name, cat, data);
+            },
+
+            deleteRule: (id) => {
+                Dialog.confirm("Delete this custom rule? (Original will return if it was an overwrite)", () => {
+                    State.customRules = State.customRules.filter(r => r.id !== id);
+                    Storage.save();
+                    Render.page();
+                }, "Delete Rule");
+            },
+
+            // --- TABLES LOGIC (Preserved) ---
+            addTable: (presetTitle = "", presetHeads = [], presetRows = []) => {
+                const rowsStr = presetRows.map(row => row.join(', ')).join('\n');
+                const headStr = presetHeads.join(', ');
+
+                const html = `
+                <div class="form-group"><label class="form-label">Title</label><input id="newTableTitle" class="inp" value="${Utils.escapeHtml(presetTitle)}"></div>
+                <div class="form-group"><label class="form-label">Headers</label><input id="newTableHead" class="inp" value="${Utils.escapeHtml(headStr)}"></div>
+                <div class="form-group"><label class="form-label">Rows (CSV)</label><textarea id="newTableRows" class="inp" style="height:150px;">${rowsStr}</textarea></div>`;
+
+                Dialog.custom(html, () => {
+                    const title = document.getElementById('newTableTitle').value.trim();
+                    const heads = document.getElementById('newTableHead').value.split(',').map(s => s.trim());
+                    const rawRows = document.getElementById('newTableRows').value.trim().split('\n');
+                    const rows = rawRows.map(r => r.split(',').map(c => c.trim()));
+
+                    const idx = State.customTables.findIndex(t => t.title === title);
+                    if (idx > -1) State.customTables.splice(idx, 1);
+
+                    State.customTables.push({ id: Date.now(), title, headers: heads, rows });
+                    Storage.save();
+                    Render.page();
+                    return true;
+                }, "Edit/Add Table");
+            },
+
+            editBuiltInTable: (idx) => {
+                const t = REFERENCE_TABLES[idx];
+                CustomContent.addTable(t.title, t.headers, t.rows);
+            },
+
+            deleteTable: (id) => {
+                Dialog.confirm("Delete table?", () => { State.customTables = State.customTables.filter(t => t.id !== id); Storage.save(); Render.page(); }, "Delete");
+            }
+        };
+
+        // --- LOGIC: COMBAT ---
+        const Combat = {
+            add: (name, init, ac, hp, maxHp, type = 'enemy', xp = 0, img = null, stats = {}) => {
+                State.combatants.push({
+                    ...stats,
+                    id: Date.now(),
+                    name,
+                    init: parseInt(init) || 0,
+                    initMod: parseInt(init) || 0,
+                    ac: parseInt(ac) || 10,
+                    hp: parseInt(hp) || 10,
+                    maxHp: parseInt(maxHp) || 10,
+                    type,
+                    xp: parseInt(xp) || 0,
+                    img,
+                    conditions: []
+                });
+                Combat.sort();
+                Storage.save();
+                if (Router.current === 'tracker') Render.page();
+                else Utils.toast(`Added ${name} to combat`);
+            },
+
+            addFromLib: (type, idx) => {
+                const ent = State.library[type][idx];
+                const xp = ent.xp || (CR_XP[ent.cr] || 0);
+                Combat.add(ent.name, ent.initMod || 0, ent.ac || 10, ent.maxHp || 10, ent.maxHp || 10, type === 'enemies' ? 'enemy' : 'npc', xp, ent.img, ent);
+            },
+
+            sort: () => { State.combatants.sort((a, b) => b.init - a.init); },
+            nextTurn: () => {
+                if (!State.combatants.length) return;
+                State.turnIndex++;
+                if (State.turnIndex >= State.combatants.length) { State.turnIndex = 0; State.encounterTime += 6; State.round += 1; }
+                Render.page();
+            },
+            startSequence: () => {
+                if (State.combatants.length === 0) return Dialog.alert("Add combatants first.");
+                const players = State.combatants.filter(c => c.type === 'player');
+                let html = `<p>Enter initiative for players. Enemies will auto-roll (d20 + Mod).</p>`;
+                if (players.length > 0) {
+                    html += `<div style="display:grid; grid-template-columns: 1fr 60px; gap:10px; margin-bottom:15px;">`;
+                    players.forEach(p => {
+                        const bonus = p.initMod || 0;
+                        html += `<div style="display:flex; align-items:center;"><b>${p.name}</b> <span class="text-sm text-muted" style="margin-left:5px;">(${bonus >= 0 ? '+' : ''}${bonus})</span></div><input id="init_p_${p.id}" type="number" class="inp" placeholder="Roll">`;
+                    });
+                    html += `</div>`;
+                }
+                Dialog.custom(html, () => {
+                    players.forEach(p => { const val = document.getElementById(`init_p_${p.id}`).value; if (val) p.init = parseInt(val); });
+                    State.combatants.forEach(c => { if (c.type !== 'player') { const mod = c.initMod !== undefined ? c.initMod : c.init; c.init = Math.floor(Math.random() * 20) + 1 + parseInt(mod); } });
+                    Combat.sort(); State.turnIndex = 0; State.encounterTime = 0; State.round = 1; Storage.save(); Render.page();
+                    return true;
+                }, "Start Encounter");
+            },
+            endEncounter: () => {
+                let xp = State.combatants.reduce((sum, c) => c.type !== 'player' ? sum + (c.xp || 0) : sum, 0);
+                Dialog.confirm(`End Encounter?<br>Total XP: <b>${xp}</b>`, () => { State.combatants = []; State.turnIndex = -1; State.encounterTime = 0; State.round = 1; Storage.save(); Render.page(); }, "End Encounter");
+            },
+            remove: (id) => { State.combatants = State.combatants.filter(c => c.id !== id); Storage.save(); Render.page(); },
+            update: (id, key, val) => { const c = State.combatants.find(x => x.id === id); if (c) { c[key] = val; Storage.save(); } },
+            addCondition: (id, cond) => { const c = State.combatants.find(x => x.id === id); if (c && !c.conditions.includes(cond)) { c.conditions.push(cond); Storage.save(); Render.page(); } },
+            removeCondition: (id, cond) => { const c = State.combatants.find(x => x.id === id); if (c) { c.conditions = c.conditions.filter(x => x !== cond); Storage.save(); Render.page(); } },
+            formatTime: () => { const t = State.encounterTime || 0; const m = Math.floor(t / 60).toString().padStart(2, '0'); const s = (t % 60).toString().padStart(2, '0'); return `${m}:${s}`; },
+            saveEncounter: () => {
+                if (State.combatants.length === 0) return Utils.toast("No combatants to save.");
+                Dialog.prompt("Name this encounter:", (name) => { State.encounters[name] = JSON.parse(JSON.stringify(State.combatants)); Storage.save(); Render.page(); Utils.toast(`Saved "${name}"`); });
+            },
+            loadEncounter: (name) => {
+                if (!State.encounters[name]) return;
+                Dialog.confirm(`Load "${name}"? <br>This replaces current combatants.`, () => { State.combatants = JSON.parse(JSON.stringify(State.encounters[name])); State.turnIndex = -1; State.encounterTime = 0; State.round = 1; Storage.save(); Render.page(); Utils.toast("Encounter loaded."); }, "Load Encounter");
+            },
+            deleteEncounter: (name) => {
+                Dialog.confirm(`Delete preset "${name}"?`, () => { delete State.encounters[name]; Storage.save(); Render.page(); }, "Delete");
+            }
+        };
+
+        // --- LOGIC: DICE ---
+        const Dice = {
+            roll: (sides, count = 1, mod = 0) => {
+                const rolls = [];
+                let sum = 0;
+                for (let i = 0; i < count; i++) { const r = Math.floor(Math.random() * sides) + 1; rolls.push(r); sum += r; }
+                const total = sum + mod;
+                const log = document.getElementById('rollLog');
+                if (log) {
+                    const div = document.createElement('div');
+                    div.className = 'log-entry';
+                    let resultClass = 'log-total';
+                    if (count === 1 && sides === 20 && rolls[0] === 20) resultClass += ' log-crit';
+                    if (count === 1 && sides === 20 && rolls[0] === 1) resultClass += ' log-fumble';
+                    div.innerHTML = `<div><div style="font-weight:bold; font-size:0.9rem;">${count}d${sides} ${mod >= 0 ? '+' + mod : mod}</div><div class="text-sm text-muted">[${rolls.join(', ')}]</div></div><div class="${resultClass}">${total}</div>`;
+                    log.prepend(div);
+                }
+            }
+        };
+
+        // --- LOGIC: LIBRARY ---
+        const Library = {
+            // --- FOLDER LOGIC ---
+            createFolder: (type) => {
+                Dialog.prompt("New Folder Name:", (name) => {
+                    State.library.folders.push({ id: Date.now(), name: name, type: type, open: true });
+                    Storage.save();
+                    Render.page();
+                });
+            },
+            deleteFolder: (id) => {
+                Dialog.confirm("Delete folder? Entities inside will move to unassigned.", () => {
+                    ['enemies', 'npcs'].forEach(t => {
+                        if (State.library[t]) {
+                            State.library[t].forEach(e => { if (e.folderId === id) e.folderId = null; });
+                        }
+                    });
+                    State.library.folders = State.library.folders.filter(f => f.id !== id);
+                    Storage.save();
+                    Render.page();
+                }, "Delete Folder");
+            },
+            toggleFolder: (id) => {
+                const f = State.library.folders.find(x => x.id === id);
+                if (f) {
+                    f.open = !f.open;
+                    Storage.save();
+
+                    // Direct DOM update to avoid scroll jumping
+                    const content = document.getElementById(`fold-${id}`);
+                    const caret = document.getElementById(`caret-${id}`);
+                    const fIcon = document.getElementById(`ficon-${id}`);
+
+                    if (content) content.classList.toggle('hidden', !f.open);
+                    if (caret) caret.className = f.open ? 'ph ph-caret-down' : 'ph ph-caret-right';
+                    if (fIcon) fIcon.className = f.open ? 'ph ph-folder-open' : 'ph ph-folder';
+                }
+            },
+
+            // --- DRAG & DROP HANDLERS ---
+            handleDragStart: (e, type, id) => {
+                e.dataTransfer.setData("text/type", type);
+                e.dataTransfer.setData("text/id", id);
+                e.dataTransfer.effectAllowed = "move";
+            },
+
+            handleFolderDrop: (e, folderId) => {
+                e.preventDefault(); e.stopPropagation();
+                const srcType = e.dataTransfer.getData("text/type");
+                const id = parseInt(e.dataTransfer.getData("text/id"));
+
+                // Find Folder
+                const folder = State.library.folders.find(f => f.id === folderId);
+                const targetType = folder.type; // Folder determines the destination type
+
+                // Find Item
+                const srcList = State.library[srcType];
+                const idx = srcList.findIndex(x => x.id === id);
+                if (idx === -1) return;
+
+                const item = srcList[idx];
+                srcList.splice(idx, 1); // Remove from source
+
+                // Add to Target List
+                item.folderId = folderId;
+                State.library[targetType].push(item);
+
+                // If we moved into a closed folder, open it
+                if (!folder.open) folder.open = true;
+
+                Storage.save(); Render.page();
+                document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            },
+
+            handleItemDrop: (e, targetType, targetId, targetFolderId) => {
+                e.preventDefault(); e.stopPropagation();
+                const srcType = e.dataTransfer.getData("text/type");
+                const srcId = parseInt(e.dataTransfer.getData("text/id"));
+
+                // Find Item
+                const srcList = State.library[srcType];
+                const srcIdx = srcList.findIndex(x => x.id === srcId);
+                if (srcIdx === -1) return;
+
+                // If dropping onto itself, do nothing
+                if (srcType === targetType && srcId === targetId) return;
+
+                const item = srcList[srcIdx];
+                srcList.splice(srcIdx, 1); // Remove from source
+
+                // Update Item Folder
+                item.folderId = targetFolderId;
+
+                // Add to Target List
+                const targetList = State.library[targetType];
+                // Insert before the target card
+                const targetIdx = targetList.findIndex(x => x.id === targetId);
+                if (targetIdx > -1) targetList.splice(targetIdx, 0, item);
+                else targetList.push(item);
+
+                Storage.save(); Render.page();
+                document.querySelectorAll('.drag-over-card').forEach(el => el.classList.remove('drag-over-card'));
+            },
+
+            // --- EDITOR LOGIC (UPDATED FOR LEGENDARY & CR FIXES) ---
+            openEditor: (type, index = null) => {
+                const el = (id) => document.getElementById(id);
+                el('editorModal').classList.add('open');
+                el('edType').value = type;
+                el('edIndex').value = index !== null ? index : -1;
+                el('editorTitle').innerText = index !== null ? "Edit Entity" : `Add New ${type === 'enemies' ? 'Enemy' : 'NPC'}`;
+                el('smartFillText').value = "";
+                Library.switchTab(1);
+                const ent = (index !== null) ? State.library[type][index] : {};
+                const setVal = (id, val) => el(id).value = (val !== undefined && val !== null) ? val : "";
+
+                setVal('edName', ent.name);
+                setVal('edCR', ent.cr || "0"); // Default 0 to avoid blank issues
+                setVal('edRace', ent.type);
+                setVal('edAC', ent.ac || 10);
+                setVal('edHP', ent.maxHp || ent.hp || 10);
+                setVal('edSpeed', ent.speed);
+                setVal('edInit', ent.initMod || 0);
+                setVal('edSenses', ent.senses);
+                setVal('edLang', ent.languages);
+                setVal('edStr', ent.str || 10);
+                setVal('edDex', ent.dex || 10);
+                setVal('edCon', ent.con || 10);
+                setVal('edInt', ent.int || 10);
+                setVal('edWis', ent.wis || 10);
+                setVal('edCha', ent.cha || 10);
+                setVal('edSaves', ent.saves);
+                setVal('edSkills', ent.skills);
+                setVal('edDmgRes', ent.dmgRes);
+                setVal('edDmgImm', ent.dmgImm);
+                setVal('edCondImm', ent.condImm);
+                setVal('edFeats', ent.feats);
+                setVal('edTraits', ent.traits);
+                setVal('edActions', ent.actions);
+                setVal('edReactions', ent.reactions);
+                setVal('edLegendary', ent.legendary); // NEW FIELD LOAD
+                el('edImgName').innerText = ent.img ? "Has image (Upload to replace)" : "No image selected";
+                el('edImg').value = "";
+            },
+
+            saveEntity: () => {
+                const el = (id) => document.getElementById(id);
+                const type = el('edType').value;
+                const index = parseInt(el('edIndex').value);
+                let name = el('edName').value;
+                if (!name) return Dialog.alert("Name is required.");
+                name = name.toUpperCase();
+
+                const existing = index >= 0 ? State.library[type][index] : null;
+
+                const newData = {
+                    id: existing ? existing.id : Date.now(),
+                    folderId: existing ? existing.folderId : null,
+                    name: name,
+                    cr: el('edCR').value,
+                    type: el('edRace').value,
+                    ac: parseInt(el('edAC').value) || 10,
+                    hp: parseInt(el('edHP').value) || 10,
+                    maxHp: parseInt(el('edHP').value) || 10,
+                    speed: el('edSpeed').value,
+                    initMod: parseInt(el('edInit').value) || 0,
+                    senses: el('edSenses').value,
+                    languages: el('edLang').value,
+                    str: parseInt(el('edStr').value) || 10,
+                    dex: parseInt(el('edDex').value) || 10,
+                    con: parseInt(el('edCon').value) || 10,
+                    int: parseInt(el('edInt').value) || 10,
+                    wis: parseInt(el('edWis').value) || 10,
+                    cha: parseInt(el('edCha').value) || 10,
+                    saves: el('edSaves').value,
+                    skills: el('edSkills').value,
+                    dmgRes: el('edDmgRes').value,
+                    dmgImm: el('edDmgImm').value,
+                    condImm: el('edCondImm').value,
+                    feats: el('edFeats').value,
+                    traits: el('edTraits').value,
+                    actions: el('edActions').value,
+                    reactions: el('edReactions').value,
+                    legendary: el('edLegendary').value, // NEW FIELD SAVE
+                    img: existing ? existing.img : null
+                };
+
+                const fileInput = el('edImg');
+                const finishSave = () => {
+                    if (index >= 0) State.library[type][index] = newData;
+                    else State.library[type].push(newData);
+                    Storage.save();
+                    Render.page();
+                    el('editorModal').classList.remove('open');
+                    Utils.toast("Entity Saved!");
+                };
+                if (fileInput.files && fileInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => { newData.img = e.target.result; finishSave(); };
+                    reader.readAsDataURL(fileInput.files[0]);
+                } else { finishSave(); }
+            },
+
+            switchTab: (idx) => {
+                document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+                document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === idx));
+            },
+
+            // --- SMART PARSE (FIXED) ---
+            smartParse: () => {
+                const el = (id) => document.getElementById(id);
+                let text = el('smartFillText').value;
+                if (!text) return;
+
+                // 1. Cleaning
+                // Remove replacement characters, normalize spaces, remove CR
+                text = text.replace(/\uFFFD/g, ' ').replace(/\r/g, '');
+                // Fix hyphenated line breaks (e.g., "bludg-\neoning")
+                text = text.replace(/-\n\s*/g, '');
+
+                const cleanVal = (str) => str ? str.trim().replace(/\s+/g, ' ') : "";
+
+                // Extraction Helper
+                const extract = (startRegex, endRegex) => {
+                    const startMatch = text.match(startRegex);
+                    if (!startMatch) return "";
+                    const startIndex = startMatch.index + startMatch[0].length;
+                    const remainder = text.substring(startIndex);
+                    let endIndex = remainder.length;
+                    const endMatch = remainder.match(endRegex);
+                    if (endMatch) endIndex = endMatch.index;
+                    return cleanVal(remainder.substring(0, endIndex));
+                };
+
+                // 2. Headers
+                const lines = text.split('\n').filter(l => l.trim().length > 0);
+                if (lines.length > 0) el('edName').value = lines[0].trim().toUpperCase();
+
+                if (lines.length > 1) {
+                    const typeRegex = /(Medium|Large|Huge|Gargantuan|Small|Tiny|Lawful|Chaotic|Neutral|Good|Evil)/i;
+                    if (lines[1].match(typeRegex)) el('edRace').value = lines[1].trim();
+                    else {
+                        el('edName').value += " " + lines[1].trim().toUpperCase();
+                        if (lines.length > 2) el('edRace').value = lines[2].trim();
+                    }
+                }
+
+                el('edAC').value = parseInt(extract(/Armor Class/i, /\n/)) || 10;
+                el('edHP').value = parseInt(extract(/Hit Points/i, /\n/)) || 10;
+                el('edSpeed').value = extract(/Speed/i, /\n|STR|DEX|CON/);
+
+                // 3. Attribute Grid
+                const gridRegex = /(\d+)\s*\([+-]?\d+\)[\s\W]+(\d+)\s*\([+-]?\d+\)[\s\W]+(\d+)\s*\([+-]?\d+\)[\s\W]+(\d+)\s*\([+-]?\d+\)[\s\W]+(\d+)\s*\([+-]?\d+\)[\s\W]+(\d+)\s*\([+-]?\d+\)/;
+                const gridMatch = text.match(gridRegex);
+
+                if (gridMatch) {
+                    el('edStr').value = gridMatch[1]; el('edDex').value = gridMatch[2];
+                    el('edCon').value = gridMatch[3]; el('edInt').value = gridMatch[4];
+                    el('edWis').value = gridMatch[5]; el('edCha').value = gridMatch[6];
+                    el('edInit').value = Math.floor((parseInt(gridMatch[2]) - 10) / 2);
+                } else {
+                    const getAttr = (name) => {
+                        const m = text.match(new RegExp(`${name}[\\s\\S]*?(\\d+)\\s*\\([+-]?\d+\\)`, 'i'));
+                        return m ? m[1] : 10;
+                    };
+                    el('edStr').value = getAttr('STR'); el('edDex').value = getAttr('DEX');
+                    el('edCon').value = getAttr('CON'); el('edInt').value = getAttr('INT');
+                    el('edWis').value = getAttr('WIS'); el('edCha').value = getAttr('CHA');
+                }
+
+                // 4. Block Stats
+                const nextHeader = /\n(?:STR|DEX|Saving Throws|Skills|Damage|Condition|Senses|Languages|Challenge|Proficiency|Traits|Actions|Legendary)/i;
+
+                el('edSaves').value = extract(/Saving Throws/i, nextHeader);
+                el('edSkills').value = extract(/Skills/i, nextHeader);
+                el('edDmgRes').value = extract(/Damage Resistances/i, nextHeader);
+                el('edDmgImm').value = extract(/Damage Immunities/i, nextHeader);
+                el('edCondImm').value = extract(/Condition Immunities/i, nextHeader);
+                el('edSenses').value = extract(/Senses/i, nextHeader);
+                el('edLang').value = extract(/Languages/i, nextHeader);
+
+                // CR Fix: Capture "Challenge 22" or "Challenge 1/4"
+                const crMatch = text.match(/Challenge\s*([0-9/]+)/i);
+                if (crMatch) {
+                    const foundCR = crMatch[1];
+                    el('edCR').value = foundCR;
+                }
+
+                // 5. Text Blocks
+                const getIndex = (regex) => text.search(regex);
+                const idxActions = getIndex(/\nACTIONS/i);
+                const idxReactions = getIndex(/\nREACTIONS/i);
+                const idxLegendary = getIndex(/\nLEGENDARY ACTIONS/i);
+
+                let startTraits = text.search(/Challenge.*/i);
+                if (startTraits !== -1) {
+                    const endOfLine = text.indexOf('\n', startTraits);
+                    startTraits = (endOfLine !== -1) ? endOfLine : startTraits + 10;
+                }
+                const profMatch = text.match(/Proficiency Bonus.*/i);
+                if (profMatch) startTraits = Math.max(startTraits, profMatch.index + profMatch[0].length);
+
+                let endTraits = text.length;
+                if (idxActions !== -1) endTraits = Math.min(endTraits, idxActions);
+                if (idxReactions !== -1) endTraits = Math.min(endTraits, idxReactions);
+                if (idxLegendary !== -1) endTraits = Math.min(endTraits, idxLegendary);
+
+                // Formatter: Cleans line breaks and force-bolds headers
+                const formatBlock = (raw) => {
+                    if (!raw) return "";
+                    // 1. Unwrap paragraphs (replace newline with space if not double newline)
+                    let fmt = raw.replace(/([^\n])\n([^\n])/g, '$1 $2');
+                    // 2. Force double newline before Action Headers (Capitalized Word followed by period/parens)
+                    // e.g. "Attack. Description" -> "\n\nAttack. Description"
+                    fmt = fmt.replace(/(\.|\)|]|^)\s+([A-Z][\w\s\(\)\-\']+\.)/g, '$1\n\n$2');
+                    return fmt.trim();
+                };
+
+                if (startTraits !== -1 && endTraits > startTraits) {
+                    el('edTraits').value = formatBlock(text.substring(startTraits, endTraits));
+                }
+
+                if (idxActions !== -1) {
+                    let end = text.length;
+                    if (idxReactions > idxActions) end = Math.min(end, idxReactions);
+                    if (idxLegendary > idxActions) end = Math.min(end, idxLegendary);
+                    el('edActions').value = formatBlock(text.substring(idxActions + 8, end));
+                }
+
+                if (idxReactions !== -1) {
+                    let end = text.length;
+                    if (idxLegendary > idxReactions) end = Math.min(end, idxLegendary);
+                    el('edReactions').value = formatBlock(text.substring(idxReactions + 10, end));
+                }
+
+                // LEGENDARY ACTIONS (Now to its own box)
+                if (idxLegendary !== -1) {
+                    let legText = text.substring(idxLegendary + 18); // skip header
+                    el('edLegendary').value = formatBlock(legText);
+                } else {
+                    el('edLegendary').value = "";
+                }
+
+                Library.switchTab(1);
+                Utils.toast("Auto-filled stats!");
+            },
+
+            deleteEntity: (type, index) => {
+                Dialog.confirm("Delete this entity permanently?", () => {
+                    State.library[type].splice(index, 1);
+                    Storage.save();
+                    Render.page();
+                }, "Delete Entity");
+            },
+
+            importParty: (files) => {
+                let count = 0;
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const json = JSON.parse(e.target.result);
+                            const findVal = (obj, keys) => {
+                                if (!obj) return null;
+                                for (let k of keys) { if (obj[k] !== undefined) return obj[k]; }
+                                for (let k of ['data', 'system', 'stats', 'props']) {
+                                    if (obj[k]) { const res = findVal(obj[k], keys); if (res !== undefined && res !== null) return res; }
+                                }
+                                return null;
+                            };
+                            const getStat = (key) => {
+                                let v = findVal(json, [key, key.toLowerCase(), `attr${key}`, `attr_${key}`, `${key.toLowerCase()}Score`]);
+                                if (typeof v === 'object' && v.value) v = v.value;
+                                return parseInt(v) || 10;
+                            };
+                            const str = getStat('Str') || getStat('Strength');
+                            const dex = getStat('Dex') || getStat('Dexterity');
+                            const con = getStat('Con') || getStat('Constitution');
+                            const int = getStat('Int') || getStat('Intelligence');
+                            const wis = getStat('Wis') || getStat('Wisdom');
+                            const cha = getStat('Cha') || getStat('Charisma');
+                            const strMod = Math.floor((str - 10) / 2);
+                            const dexMod = Math.floor((dex - 10) / 2);
+                            const name = findVal(json, ['name', 'charName']) || "Unknown";
+                            const race = findVal(json, ['race', 'charRace']) || "Unknown Race";
+                            const raceStr = typeof race === 'string' ? race : (race.name || "Unknown Race");
+                            const charClass = findVal(json, ['class', 'classes', 'charClass', 'charSubclass']) || "Class";
+                            let classStr = "";
+                            if (Array.isArray(charClass)) { classStr = charClass.map(c => `${c.name} ${c.level}`).join(" / "); }
+                            else if (typeof charClass === 'string') { classStr = charClass; }
+                            const level = findVal(json, ['level', 'lvl', 'charLevel']) || 1;
+                            const prof = Math.ceil((parseInt(level) || 1) / 4) + 1;
+                            const ac = parseInt(findVal(json, ['ac', 'armorClass', 'valAC']) || 10);
+                            const hpCurr = parseInt(findVal(json, ['hp', 'hpCurr', 'value']) || 10);
+                            const hpMax = parseInt(findVal(json, ['hpMax', 'max']) || 10);
+                            const img = findVal(json, ['img', 'image', 'avatar', 'encodedImage', 'token']);
+                            let weapons = [];
+                            const items = findVal(json, ['items', 'inventory', 'actions', 'attacks']);
+                            if (Array.isArray(items)) {
+                                items.forEach(item => {
+                                    if (!item.name) return;
+                                    const isWeapon = item.type === 'weapon' || (item.data && item.data.damage) || item.damage;
+                                    if (isWeapon) {
+                                        let totalHit = 0;
+                                        const explicitBonus = parseInt(item.data?.attackBonus || item.attackBonus) || 0;
+                                        const props = item.data?.properties || item.properties || {};
+                                        const actionType = item.data?.actionType || "";
+                                        const isFinesse = (props.fin === true) || (String(props).includes('fin'));
+                                        const isRanged = (actionType === 'rwak') || (item.type === 'ranged');
+                                        let abilityMod = strMod;
+                                        if (isRanged) abilityMod = dexMod;
+                                        else if (isFinesse) abilityMod = Math.max(strMod, dexMod);
+                                        const isProf = (item.data?.proficient !== false) && (item.proficient !== false);
+                                        const profBonus = isProf ? prof : 0;
+                                        if (item.toHit !== undefined) { totalHit = parseInt(item.toHit); }
+                                        else { totalHit = abilityMod + profBonus + explicitBonus; }
+                                        const sign = totalHit >= 0 ? '+' : '';
+                                        let dmg = item.damage || (item.data ? item.data.damage : "") || "";
+                                        if (Array.isArray(dmg)) dmg = dmg.map(d => d[0] || d).join(" + ");
+                                        else if (typeof dmg === 'object') dmg = dmg.parts ? dmg.parts.map(d => d[0]).join(" + ") : "";
+                                        weapons.push(`${item.name} (${sign}${totalHit}, ${dmg})`);
+                                    }
+                                });
+                            }
+                            if (weapons.length === 0 && json.attacks && Array.isArray(json.attacks)) {
+                                weapons = json.attacks.map(a => {
+                                    const n = findVal(a, ['name', 'n', 'label']) || "Unknown";
+                                    const b = a.toHit || a.attackBonus || 0;
+                                    const d = a.damage || a.d || "";
+                                    return `${n} (${b >= 0 ? '+' : ''}${b}, ${d})`;
+                                });
+                            }
+                            let featList = [];
+                            const feats = findVal(json, ['features', 'traits', 'feeds', 'classFeatures']);
+                            if (Array.isArray(feats)) featList = feats.map(f => f.name || f);
+                            let spellList = [];
+                            const sp = findVal(json, ['spells', 'spellbook']);
+                            if (Array.isArray(sp)) spellList = sp.map(s => {
+                                if (typeof s === 'string') return s;
+                                if (typeof s === 'object') return findVal(s, ['name', 'n', 'label']) || "Unknown Spell";
+                                return "Unknown";
+                            });
+                            const wisMod = Math.floor((wis - 10) / 2);
+                            const init = parseInt(findVal(json, ['init', 'initiative', 'valInit'])) || dexMod;
+                            const speed = findVal(json, ['speed', 'valSpeed']) || "30 ft";
+                            const castingAb = findVal(json, ['spellcastingAbility', 'spellAbility', 'castingAbility']);
+                            let spellMod = 0;
+                            if (castingAb) {
+                                if (String(castingAb).toLowerCase().includes('int')) spellMod = Math.floor((int - 10) / 2);
+                                else if (String(castingAb).toLowerCase().includes('wis')) spellMod = Math.floor((wis - 10) / 2);
+                                else if (String(castingAb).toLowerCase().includes('cha')) spellMod = Math.floor((cha - 10) / 2);
+                            } else { const m = Math.max(int, wis, cha); spellMod = Math.floor((m - 10) / 2); }
+                            const spellDC = 8 + prof + spellMod;
+                            const char = {
+                                name: name, type: 'player', race: raceStr, subclass: classStr, ac: ac, hp: hpCurr || hpMax || 10, maxHp: hpMax || hpCurr || 10, lvl: parseInt(level) || 1, speed: (typeof speed === 'object' ? speed.value : speed) || 30, initMod: init, str, dex, con, int, wis, cha, weapons: weapons.join(", "), features: featList.join(", "), spells: spellList.join(", "), pp: 10 + wisMod, img: img, languages: "Common", prof: prof, dc: spellDC
+                            };
+                            State.party.push(char); count++;
+                            if (count === files.length) { Utils.toast("Party imported"); Render.page(); }
+                        } catch (err) { console.error(err); Utils.toast("Error parsing JSON"); }
+                    };
+                    reader.readAsText(file);
+                });
+            }
+        };
+
+        // --- RENDERER ---
+        const Render = {
+            page: () => {
+                const app = document.getElementById('app');
+                app.innerHTML = '';
+                switch (Router.current) {
+                    case 'tracker': Render.tracker(app); break;
+                    case 'library': Render.library(app); break;
+                    case 'party': Render.party(app); break;
+                    case 'setting': Render.setting(app); break;
+                    case 'dice': Render.dice(app); break;
+                    case 'rules': Render.rules(app); break;
+                    case 'tables': Render.tables(app); break;
+                    case 'settings': Render.settings(app); break;
+                }
+            },
+
+            tracker: (parent) => {
+                const timeDisplay = Combat.formatTime();
+                const roundDisplay = State.round || 1;
+                const encOptions = Object.keys(State.encounters).map(k => `<option value="${k}">${k} (${State.encounters[k].length})</option>`).join('');
+
+                parent.innerHTML = `
+        <div class="layout-split">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Combat</span>
+                    <div class="flex-row" style="margin: 0 15px; border-left:1px solid #ccc; padding-left:15px; border-right:1px solid #ccc; padding-right:15px;">
+                        <button class="btn btn-outline" title="Save Setup" onclick="Combat.saveEncounter()"><i class="ph ph-floppy-disk"></i></button>
+                        <select class="inp" style="width:120px;" onchange="if(this.value) Combat.loadEncounter(this.value); this.value='';">
+                            <option value="">Load...</option>${encOptions}
+                        </select>
+                        ${Object.keys(State.encounters).length > 0 ? `<button class="btn btn-outline btn-danger" title="Delete Saved" onclick="const s=this.previousElementSibling; if(s.value) Combat.deleteEncounter(s.value); else Dialog.alert('Select an encounter in the dropdown first.');"><i class="ph ph-trash"></i></button>` : ''}
+                    </div>
+                    <div class="flex-row">
+                        <div style="font-family:monospace; margin-right:15px; text-align:right; line-height:1.1;">
+                            <div style="font-weight:bold; font-size:1.1rem;">${timeDisplay}</div>
+                            <div class="text-sm text-muted">Rnd ${roundDisplay}</div>
+                        </div>
+                        <button class="btn" style="background:var(--accent-secondary); color:#000;" onclick="Combat.startSequence()"><i class="ph ph-lightning"></i> Start</button>
+                        <button class="btn" onclick="Combat.nextTurn()">Next <i class="ph ph-arrow-right"></i></button>
+                        <button class="btn btn-outline" onclick="Combat.endEncounter()" title="End & XP"><i class="ph ph-check"></i></button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div style="display:grid; grid-template-columns:80px 1fr 120px 80px 40px; gap:10px; padding:0 8px; margin-bottom:5px; font-size:0.7rem; font-weight:bold; color:var(--text-muted); text-transform:uppercase;">
+                        <div style="text-align:center">Init</div><div>Name</div><div style="text-align:center">Health</div><div style="text-align:center">AC</div><div></div>
+                    </div>
+                    <div class="tracker-list" id="trackerList"></div>
+                </div>
+                <div style="padding:15px; background:#f0e6d2; border-top:1px solid var(--border-color);">
+                    <form onsubmit="Combat.add(this.name.value, this.init.value, this.ac.value, this.hp.value, this.hp.value, 'enemy'); this.reset(); return false;" class="flex-row" style="gap:10px;">
+                        <input name="init" placeholder="Mod" class="inp" type="number" style="width:60px;">
+                        <input name="name" placeholder="Name" class="inp" required>
+                        <input name="ac" placeholder="AC" class="inp" type="number" style="width:60px;">
+                        <input name="hp" placeholder="HP" class="inp" type="number" style="width:60px;">
+                        <button type="submit" class="btn"><i class="ph ph-plus"></i></button>
+                    </form>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><span class="panel-title">Scratchpad</span></div>
+                <div style="flex:1; display:flex;">
+                    <textarea id="scratchpad" style="flex:1; border:none; resize:none; padding:15px; font-family:var(--font-body); background:transparent; font-size:1rem; line-height:1.5;" placeholder="Session notes... (Auto-saved)" oninput="State.notes = this.value; Storage.save();">${State.notes}</textarea>
+                </div>
+            </div>
+        </div>`;
+
+                const list = document.getElementById('trackerList');
+                if (list && State.combatants.length > 0) {
+                    State.combatants.forEach((c, idx) => {
+                        const row = document.createElement('div');
+                        const isActive = idx === State.turnIndex;
+                        row.className = `combatant-row ${isActive ? 'active' : ''} ${c.type}`;
+                        const hpPct = Math.max(0, Math.min(100, (c.hp / c.maxHp) * 100));
+                        let barColor = 'rgba(39, 174, 96, 0.4)';
+                        if (hpPct < 50) barColor = 'rgba(211, 84, 0, 0.4)';
+                        if (hpPct < 25) barColor = 'rgba(192, 57, 43, 0.5)';
+                        const gradient = `linear-gradient(90deg, ${barColor} ${hpPct}%, transparent ${hpPct}%)`;
+                        const bloodiedClass = (hpPct < 50 && c.hp > 0) ? 'bloodied' : '';
+                        const conds = c.conditions.map(cond => `<span class="cond-tag" onclick="Combat.removeCondition(${c.id}, '${cond}')">${cond} &times;</span>`).join('');
+                        const safeObj = JSON.stringify(c).replace(/"/g, '&quot;');
+
+                        row.innerHTML = `
+                    <input type="number" value="${c.init}" class="inp" style="text-align:center; border:none; background:transparent; font-weight:bold; font-size:1.5rem; color:var(--accent-primary);" onchange="Combat.update(${c.id}, 'init', this.value); Combat.sort(); Render.page();">
+                    <div>
+                        <div class="flex-row">
+                            <input value="${c.name}" class="inp" style="border:none; background:transparent; font-weight:bold; padding:0; font-size:1rem;" onchange="Combat.update(${c.id}, 'name', this.value)">
+                            <i class="ph ph-eye" style="cursor:pointer; color:var(--accent-primary);" onclick='Render.inspect(${safeObj})'></i>
+                        </div>
+                        <div style="margin-top:2px; min-height:20px;">${conds} <i class="ph ph-plus-circle" style="cursor:pointer; font-size:0.8rem; color:#888;" onclick="Render.addConditionPrompt(${c.id})"></i></div>
+                    </div>
+                    <div class="flex-row">
+                        <input type="number" value="${c.hp}" class="inp hp-input ${bloodiedClass}" style="background: ${gradient};" onchange="Combat.update(${c.id}, 'hp', this.value); Render.page();">
+                        <span style="color:#aaa;">/</span>
+                        <input type="number" value="${c.maxHp}" class="inp" style="width:40px; border:none; background:transparent; color:#888;" onchange="Combat.update(${c.id}, 'maxHp', this.value)">
+                    </div>
+                    <div style="text-align:center;"><input type="number" value="${c.ac}" class="inp" style="text-align:center; width:100%;" onchange="Combat.update(${c.id}, 'ac', this.value)"></div>
+                    <i class="ph ph-trash" style="cursor:pointer; color:#aaa; text-align:center;" onclick="Combat.remove(${c.id})"></i>
+                `;
+                        list.appendChild(row);
+                    });
+                } else if (list) { list.innerHTML = `<div style="text-align:center; padding:40px; color:#999; font-style:italic;">No combatants active.</div>`; }
+            },
+
+            tables: (parent) => {
+                let rawHtml = `<div class="layout-single panel">
+                <div class="panel-header">
+                    <span class="panel-title">DM Tables</span>
+                    <button class="btn" onclick="CustomContent.addTable()"><i class="ph ph-plus"></i> Add Table</button>
+                </div>
+                <div class="panel-body" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(350px, 1fr)); gap:20px; align-content:start;">`;
+
+                // Helper to render any table card
+                const renderCard = (id, title, headers, rows, isCustom, idx) => {
+                    const safeTitle = Utils.escapeHtml(title);
+                    // Prepare Edit Action
+                    const editAction = isCustom
+                        ? `CustomContent.addTable('${safeTitle}', ${JSON.stringify(headers).replace(/"/g, '&quot;')}, ${JSON.stringify(rows).replace(/"/g, '&quot;')})`
+                        : `CustomContent.editBuiltInTable(${idx})`;
+
+                    const deleteBtn = isCustom
+                        ? `<i class="ph ph-trash" style="cursor:pointer;" onclick="CustomContent.deleteTable(${id})"></i>`
+                        : '';
+
+                    // Card HTML: Fixed header, Scrollable body (max-height: 400px)
+                    return `<div id="${isCustom ? 'ctbl-' + id : 'tbl-' + idx}" style="border:1px solid #c0b090; border-radius:6px; overflow:hidden; background:${isCustom ? '#fffcf5' : 'white'}; display:flex; flex-direction:column; max-height:450px;">
+                        <div style="background:${isCustom ? 'var(--accent-secondary)' : '#f4f0e6'}; padding:8px; font-weight:bold; border-bottom:1px solid #c0b090; color:${isCustom ? '#000' : 'var(--accent-primary)'}; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+                            <span>${title}</span>
+                            <div class="flex-row">
+                                <i class="ph ph-pencil-simple" style="cursor:pointer; margin-right:8px; opacity:0.6;" onclick="${editAction}" title="Edit"></i>
+                                ${deleteBtn}
+                            </div>
+                        </div>
+                        <div style="overflow-y:auto; flex:1;">
+                            <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+                                ${headers && headers.length ? `<thead style="position:sticky; top:0; background:#fff; z-index:1;"><tr>${headers.map(h => `<th style="text-align:left; padding:8px; border-bottom:2px solid #ccc; background:#f9f9f9;">${h}</th>`).join('')}</tr></thead>` : ''}
+                                <tbody>
+                                    ${rows.map(row => `<tr>${row.map(c => `<td style="padding:8px; border-bottom:1px solid #eee;">${c}</td>`).join('')}</tr>`).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>`;
+                };
+
+                // 1. Custom Tables
+                State.customTables.forEach(t => {
+                    rawHtml += renderCard(t.id, t.title, t.headers, t.rows, true);
+                });
+
+                // 2. Built-in Tables
+                REFERENCE_TABLES.forEach((t, i) => {
+                    rawHtml += renderCard(null, t.title, t.headers, t.rows, false, i);
+                });
+
+                rawHtml += `</div></div>`;
+                parent.innerHTML = Utils.processUnits(rawHtml);
+            },
+
+            setting: (parent) => {
+                parent.innerHTML = `
+                <div class="layout-single panel" style="padding:0; overflow:hidden; background:#000;">
+                    <iframe src="grimhollow.html" style="width:100%; height:100%; border:none;"></iframe>
+                </div>`;
+            },
+
+            settings: (parent) => {
+                parent.innerHTML = `
+                <div class="layout-single panel">
+                <div class="panel-header"><span class="panel-title">System Settings & Data</span></div>
+                <div class="panel-body" style="max-width: 800px; margin: 0 auto; width: 100%;">
+                    <div style="background:#fff; border:1px solid var(--border-color); border-radius:8px; padding:20px; margin-bottom:20px;">
+                        <h3 style="margin-top:0; font-family:var(--font-header);"><i class="ph ph-sliders"></i> Preferences</h3>
+                        <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:1rem;">
+                            <input type="checkbox" id="unitToggle" ${State.useMetric ? 'checked' : ''} onchange="State.useMetric = this.checked; Storage.save(); Render.page();"> 
+                            <span>Use Metric Units (m/kg)</span>
+                        </label>
+                        <p style="color:#666; font-size:0.9rem; margin-top:5px; margin-left:24px;">Automatically converts distances and weights in Rules and Tables.</p>
+                    </div>
+                    <div style="background:#fff; border:1px solid var(--border-color); border-radius:8px; padding:20px; margin-bottom:20px;">
+                        <h3 style="margin-top:0; font-family:var(--font-header);"><i class="ph ph-hard-drives"></i> Data Management</h3>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button class="btn" onclick="DataIO.export()"><i class="ph ph-export"></i> Export Backup</button>
+                            <button class="btn btn-outline" onclick="document.getElementById('importFile').click()"><i class="ph ph-upload"></i> Restore Backup</button>
+                            <input type="file" id="importFile" class="hidden" accept=".json" onchange="DataIO.import(this.files[0])">
+                            <button class="btn btn-outline" onclick="DataIO.clearImages()"><i class="ph ph-image"></i> Clear Images (Free Space)</button>
+                        </div>
+                    </div>
+                    <div style="background:#fff0f0; border:1px solid #eecaca; border-radius:8px; padding:20px; margin-top:40px;">
+                        <h3 style="margin-top:0; font-family:var(--font-header); color:var(--hp-low);"><i class="ph ph-warning"></i> Danger Zone</h3>
+                        <button class="btn btn-danger" onclick="DataIO.nuke()"><i class="ph ph-trash"></i> Factory Reset</button>
+                </div>
+            </div>
+        </div>`;
+            },
+
+            library: (parent) => {
+                parent.innerHTML = `
+        <div class="layout-single panel">
+        <div class="panel-header">
+            <span class="panel-title">Library</span>
+            <div class="flex-row">
+                <button class="btn" onclick="Library.openEditor('enemies')">+ Enemy</button>
+                <button class="btn" onclick="Library.createFolder('enemies')"><i class="ph ph-folder-plus"></i> Folder</button>
+            </div>
+        </div>
+        <div class="panel-body">
+            <h3 style="margin-top:0; font-family:var(--font-header); border-bottom:1px solid #ddd; display:flex; justify-content:space-between;">
+                Enemies
+            </h3>
+            <div id="enemyContainer"></div>
+
+            <div class="panel-header" style="margin-top:30px; border-top:1px solid #ddd; background:none; padding-left:0;">
+                <span class="panel-title">NPCs</span>
+                <div class="flex-row">
+                    <button class="btn" onclick="Library.openEditor('npcs')">+ NPC</button>
+                    <button class="btn" onclick="Library.createFolder('npcs')"><i class="ph ph-folder-plus"></i> Folder</button>
+                </div>
+            </div>
+            <div id="npcContainer"></div>
+        </div>
+    </div>`;
+
+                const renderSection = (type, containerId) => {
+                    const container = document.getElementById(containerId);
+                    container.innerHTML = ''; // Clear previous
+
+                    // 1. Render Folders
+                    const folders = State.library.folders.filter(f => f.type === type);
+                    folders.forEach(f => {
+                        const folderEl = document.createElement('div');
+                        folderEl.className = 'folder-wrap';
+
+                        // Drag Events for Folder
+                        folderEl.ondragover = (e) => { e.preventDefault(); folderEl.classList.add('drag-over'); };
+                        folderEl.ondragleave = () => folderEl.classList.remove('drag-over');
+                        folderEl.ondrop = (e) => Library.handleFolderDrop(e, f.id);
+
+                        folderEl.innerHTML = `
+                        <div class="folder-header" onclick="Library.toggleFolder(${f.id})">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <i id="caret-${f.id}" class="ph ${f.open ? 'ph-caret-down' : 'ph-caret-right'}"></i>
+                                <span><i id="ficon-${f.id}" class="ph ${f.open ? 'ph-folder-open' : 'ph-folder'}"></i> ${f.name}</span>
+                            </div>
+                            <i class="ph ph-trash" style="color:#888;" onclick="event.stopPropagation(); Library.deleteFolder(${f.id})"></i>
+                        </div>
+                        <div class="folder-content ${f.open ? '' : 'hidden'}" id="fold-${f.id}"></div>
+                    `;
+                        container.appendChild(folderEl);
+                    });
+
+                    // 2. Create Grid Container for Root Cards
+                    const cardGrid = document.createElement('div');
+                    cardGrid.className = 'card-grid';
+                    container.appendChild(cardGrid);
+
+                    // 3. Render Cards
+                    State.library[type].forEach((e, idx) => {
+                    // Added onclick to both the image AND the placeholder
+                    const imgHTML = e.img
+                        ? `<img src="${e.img}" class="card-img" onclick="Render.inspect('${type}', ${idx})">`
+                        : `<div class="card-img" style="display:flex;align-items:center;justify-content:center;color:#777;font-style:italic;background:#eee;cursor:pointer;" onclick="Render.inspect('${type}', ${idx})">No Image</div>`;
+
+                    const card = document.createElement('div');
+                    card.className = 'entity-card';
+                    card.draggable = true;
+
+                    // Drag Events
+                    card.ondragstart = (ev) => Library.handleDragStart(ev, type, e.id);
+                    card.ondragover = (ev) => { ev.preventDefault(); card.classList.add('drag-over-card'); };
+                    card.ondragleave = () => card.classList.remove('drag-over-card');
+                    card.ondrop = (ev) => Library.handleItemDrop(ev, type, e.id, e.folderId);
+
+                    card.innerHTML = `
+                    <div class="card-head">
+                        <span class="card-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px;">${e.name}</span>
+                        <div class="flex-row">
+                            <i class="ph ph-eye" style="cursor:pointer; margin-right:5px;" onclick="Render.inspect('${type}', ${idx})"></i>
+                            <i class="ph ph-pencil-simple" style="cursor:pointer; margin-right:5px;" onclick="Library.openEditor('${type}', ${idx})"></i>
+                            <i class="ph ph-trash" style="cursor:pointer;" onclick="Library.deleteEntity('${type}', ${idx})"></i>
+                        </div>
+                    </div>
+                    ${imgHTML}
+                    <div class="card-stats">
+                        <div class="stat-line"><span>AC</span> <b>${e.ac}</b></div>
+                        <div class="stat-line"><span>HP</span> <b>${e.maxHp}</b></div>
+                        <div class="stat-line"><span>Spd</span> <b>${e.speed}</b></div>
+                        <div class="stat-line" style="margin-top:auto; border:none; padding-top:4px; font-size:0.75rem; color:#666; font-style:italic;">
+                            ${e.type}
+                        </div>
+                    </div>
+                    <div class="card-actions" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:bold; font-size:0.8rem;">CR ${e.cr}</span>
+                        <button class="btn" style="padding:4px 10px;" onclick="Combat.addFromLib('${type}', ${idx})">Add</button>
+                    </div>
+                `;
+
+                        // Place in folder or root grid
+                        if (e.folderId) {
+                            const fContent = document.getElementById(`fold-${e.folderId}`);
+                            if (fContent) fContent.appendChild(card);
+                            else cardGrid.appendChild(card);
+                        } else {
+                            cardGrid.appendChild(card);
+                        }
+                    });
+
+                    // 4. Root Drop Zone (Empty space in the grid)
+                    const rootDrop = document.createElement('div');
+                    rootDrop.style.flex = "1";
+                    rootDrop.style.minWidth = "100px";
+                    rootDrop.style.minHeight = "200px";
+                    rootDrop.style.border = "2px dashed transparent";
+                    rootDrop.style.borderRadius = "8px";
+                    rootDrop.style.display = "flex";
+                    rootDrop.style.alignItems = "center";
+                    rootDrop.style.justifyContent = "center";
+                    rootDrop.style.color = "#aaa";
+
+                    // Show "Drop Here" when dragging
+                    rootDrop.ondragover = (ev) => {
+                        ev.preventDefault();
+                        rootDrop.style.borderColor = "var(--accent-primary)";
+                        rootDrop.style.background = "rgba(0,0,0,0.02)";
+                        rootDrop.innerText = "Move to Root";
+                    };
+                    rootDrop.ondragleave = () => {
+                        rootDrop.style.borderColor = "transparent";
+                        rootDrop.style.background = "transparent";
+                        rootDrop.innerText = "";
+                    };
+
+                    // --- CROSS-TYPE DROP LOGIC ---
+                    rootDrop.ondrop = (ev) => {
+                        ev.preventDefault();
+                        const srcType = ev.dataTransfer.getData("text/type");
+                        const id = parseInt(ev.dataTransfer.getData("text/id"));
+
+                        // Logic to move item from Source to Target Root
+                        const srcList = State.library[srcType];
+                        const idx = srcList.findIndex(x => x.id === id);
+                        if (idx === -1) return;
+
+                        const item = srcList[idx];
+                        srcList.splice(idx, 1); // Remove from source
+
+                        item.folderId = null; // Clear folder
+                        State.library[type].push(item); // Add to THIS list (type)
+
+                        Storage.save(); Render.page();
+                    };
+
+                    cardGrid.appendChild(rootDrop);
+                };
+
+                renderSection('enemies', 'enemyContainer');
+                renderSection('npcs', 'npcContainer');
+            },
+
+            party: (parent) => {
+                parent.innerHTML = `
+        <div class="layout-single panel">
+            <div class="panel-header">
+                <span class="panel-title">Party Overview</span>
+                <button class="btn" onclick="document.getElementById('partyImp').click()"><i class="ph ph-upload"></i> Import JSON</button>
+                <input type="file" id="partyImp" class="hidden" multiple accept=".json" onchange="Library.importParty(this.files)">
+            </div>
+            <div class="panel-body"><div class="card-grid" id="partyGrid"></div></div>
+        </div>`;
+                const grid = document.getElementById('partyGrid');
+                if (!State.party || State.party.length === 0) { grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:50px; color:#999;">No party loaded. Import JSON files from standard 5e character sheets.</div>`; return; }
+
+                State.party.forEach((p, idx) => {
+                    const safeObj = JSON.stringify(p).replace(/"/g, '&quot;');
+                    const imgHTML = p.img
+                        ? `<img src="${p.img}" class="card-img" style="height:100px; cursor:zoom-in;" onclick='Render.inspect(${safeObj})'>`
+                        : `<div class="card-img" style="height:100px; display:flex;align-items:center;justify-content:center;color:#777;font-style:italic;background:#eee;">No Image</div>`;
+
+                    const div = document.createElement('div');
+                    div.className = 'entity-card';
+                    div.innerHTML = `
+                <div class="card-head" style="background:var(--blue-player);">
+                    <div style="display:flex; flex-direction:column; width:100%;">
+                        <span class="card-title">${p.name}</span>
+                        <small style="opacity:0.8; font-weight:normal; font-size:0.7rem;">Lvl ${p.lvl} ${p.subclass}</small>
+                    </div>
+                    <div class="flex-row">
+                        <i class="ph ph-eye" style="cursor:pointer; margin-right:5px;" onclick='Render.inspect(${safeObj})'></i>
+                        <i class="ph ph-pencil-simple" style="cursor:pointer; margin-right:5px; font-size:0.9rem; opacity:0.6;" onclick="document.getElementById('imgUpload${idx}').click()" title="Change Image"></i>
+                        <input type="file" id="imgUpload${idx}" class="hidden" accept="image/*" onchange="const r=new FileReader(); r.onload=e=>{State.party[${idx}].img=e.target.result; Storage.save(); Render.page();}; r.readAsDataURL(this.files[0]);">
+                        <i class="ph ph-trash" style="cursor:pointer;" onclick="Dialog.confirm('Remove ${p.name} from party?', () => { State.party.splice(${idx}, 1); Storage.save(); Render.page(); })"></i>
+                    </div>
+                </div>
+                ${imgHTML}
+                <div class="card-stats">
+                    <div class="stat-line"><span>AC</span> <b>${p.ac}</b></div>
+                    <div class="stat-line"><span>HP</span> <b>${p.hp}/${p.maxHp}</b></div>
+                    <div class="stat-line"><span>Spell DC</span> <b>${p.dc || "N/A"}</b></div>
+                    <div class="stat-line"><span>Passive Perc</span> <b>${p.pp}</b></div>
+                    <div class="stat-line"><span>Init</span> <b>${p.initMod >= 0 ? '+' + p.initMod : p.initMod}</b></div>
+                </div>
+                <div class="card-actions"><button class="btn w-full" onclick="Combat.add('${p.name}', ${p.initMod}, ${p.ac}, ${p.hp}, ${p.maxHp}, 'player', 0, '${p.img || ''}', ${safeObj})">To Combat</button></div>
+            `;
+                    grid.appendChild(div);
+                });
+            },
+
+            dice: (parent) => {
+                parent.innerHTML = `
+        <div class="layout-single panel">
+            <div class="panel-header">
+                <span class="panel-title">Dice Tray</span>
+                <div class="flex-row">
+                    <label class="text-sm">Count:</label> <input id="dCount" type="number" class="inp" value="1" style="width:50px; text-align:center;">
+                    <label class="text-sm">Mod:</label> <input id="dMod" type="number" class="inp" value="0" style="width:50px; text-align:center;">
+                    <button class="btn btn-outline" onclick="document.getElementById('rollLog').innerHTML=''">Clear Log</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="dice-area">
+                    <div class="dice-row">
+                        <button class="die-btn" onclick="Render.doRoll(4)"><i class="ph ph-triangle die-val"></i><span class="die-name">d4</span></button>
+                        <button class="die-btn" onclick="Render.doRoll(6)"><i class="ph ph-cube die-val"></i><span class="die-name">d6</span></button>
+                        <button class="die-btn" onclick="Render.doRoll(8)"><i class="ph ph-diamond die-val"></i><span class="die-name">d8</span></button>
+                        <button class="die-btn" onclick="Render.doRoll(10)"><i class="ph ph-caret-down die-val"></i><span class="die-name">d10</span></button>
+                        <button class="die-btn" onclick="Render.doRoll(12)"><i class="ph ph-hexagon die-val"></i><span class="die-name">d12</span></button>
+                        <button class="die-btn" onclick="Render.doRoll(20)"><i class="ph ph-star die-val"></i><span class="die-name">d20</span></button>
+                        <button class="die-btn" onclick="Render.doRoll(100)"><i class="ph ph-circle die-val"></i><span class="die-name">d100</span></button>
+                    </div>
+                    <div id="rollLog" class="log-container"></div>
+                </div>
+            </div>
+        </div>`;
+            },
+            doRoll: (sides) => { const c = parseInt(document.getElementById('dCount').value) || 1; const m = parseInt(document.getElementById('dMod').value) || 0; Dice.roll(sides, c, m); },
+
+            rules: (parent) => {
+                parent.innerHTML = `
+                <div class="layout-single panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Rules Reference</span>
+                        <div class="flex-row">
+                            <button class="btn" onclick="CustomContent.addRule()"><i class="ph ph-plus"></i> Add Rule</button>
+                            <input class="inp" placeholder="Search rules..." oninput="Render.filterRules(this.value)" style="width:150px;">
+                        </div>
+                    </div>
+                    <div class="panel-body" id="rulesBody" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:20px; align-items:start;"></div>
+                </div>`;
+                Render.filterRules('');
+            },
+
+            filterRules: (query) => {
+                const q = query.toLowerCase();
+                const container = document.getElementById('rulesBody');
+                if (!container) return;
+
+                // 1. Create a display object starting with the built-ins
+                // We use spread syntax to create copies so we don't mutate the originals
+                const displayData = {
+                    "Conditions": { ...CONDITIONS },
+                    "Actions": { ...ACTIONS }
+                };
+
+                // 2. Merge Custom Rules (They overwrite built-ins if names match)
+                if (State.customRules) {
+                    State.customRules.forEach(r => {
+                        const cat = r.cat || "Custom Rules";
+                        if (!displayData[cat]) displayData[cat] = {};
+
+                        // Store as an object to flag it as custom
+                        displayData[cat][r.name] = {
+                            desc: r.desc,
+                            isCustom: true,
+                            id: r.id
+                        };
+                    });
+                }
+
+                let html = '';
+
+                // 3. Render
+                for (const [cat, items] of Object.entries(displayData)) {
+                    let sectionHtml = '';
+                    // Sort names alphabetically
+                    const sortedNames = Object.keys(items).sort();
+
+                    for (const name of sortedNames) {
+                        const content = items[name];
+
+                        // Determine if it's a simple string (original) or object (custom)
+                        const isCustom = typeof content === 'object';
+                        const desc = isCustom ? content.desc : content;
+
+                        if (name.toLowerCase().includes(q) || desc.toLowerCase().includes(q)) {
+
+                            // Logic for Edit Button
+                            // If custom: edit existing. If built-in: create new custom copy.
+                            const editAction = isCustom
+                                ? `CustomContent.addRule('${Utils.escapeHtml(name)}', '${Utils.escapeHtml(cat)}', \`${desc.replace(/`/g, '\\`')}\`)`
+                                : `CustomContent.editBuiltInRule('${cat}', '${name}')`;
+
+                            // Logic for Delete Button (Only for custom)
+                            const deleteBtn = isCustom
+                                ? `<i class="ph ph-trash" style="cursor:pointer; color:#c0392b;" onclick="event.stopPropagation(); CustomContent.deleteRule(${content.id})" title="Delete Custom Rule"></i>`
+                                : '';
+
+                            // Highlight overwrites (Visual cue that this is a modified rule)
+                            const titleStyle = isCustom ? 'color:var(--accent-primary);' : '';
+
+                            sectionHtml += `
+                            <div style="margin-bottom:8px; border:1px solid #eee; border-radius:4px; overflow:hidden;">
+                                <div style="background:#f4f0e6; padding:8px 10px; font-weight:bold; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                                    <span style="${titleStyle}">${name}</span>
+                                    <div class="flex-row">
+                                        <i class="ph ph-pencil-simple" style="cursor:pointer; opacity:0.5; margin-right:8px;" onclick="event.stopPropagation(); ${editAction}" title="Edit"></i>
+                                        ${deleteBtn}
+                                        <i class="ph ph-caret-down" style="margin-left:5px; opacity:0.5;"></i>
+                                    </div>
+                                </div>
+                                <div class="hidden" style="padding:10px; background:#fff; font-size:0.9rem; line-height:1.4;">${Utils.processUnits(desc)}</div>
+                            </div>`;
+                        }
+                    }
+                    if (sectionHtml) {
+                        html += `<div style="min-width:0;"><h3 style="font-family:var(--font-header); color:var(--accent-primary); border-bottom:2px solid var(--border-color); margin-top:0; margin-bottom:15px;">${cat}</h3>${sectionHtml}</div>`;
+                    }
+                }
+                container.innerHTML = html;
+            },
+
+            inspect: (entityOrType, idx = null) => {
+                let entity = entityOrType;
+
+                // FIX: If first arg is a string, fetch the entity from the Library state
+                if (typeof entityOrType === 'string' && idx !== null) {
+                    entity = State.library[entityOrType][idx];
+                }
+
+                if (!entity) return; // Safety check
+
+                const modal = document.getElementById('inspectModal');
+                const content = document.getElementById('inspectContent');
+                const xp = entity.xp || (CR_XP[entity.cr] || 0);
+                const imgHtml = entity.img ? `<img src="${entity.img}" class="inspect-img">` : `<div style="color:#666; text-align:center; padding-top:50%;">No Image</div>`;
+
+                const fmt = (lbl, val) => val ? `<div class="sb-row"><span class="trait-name">${lbl}</span> ${val}</div>` : '';
+                const statBox = (lbl, val) => `<div class="sb-attr-box"><span>${lbl}</span><span class="sb-attr-val">${val}</span><small>${val >= 10 ? '+' : ''}${Math.floor((val - 10) / 2)}</small></div>`;
+
+                const formatText = (text) => {
+                    if (!text) return '';
+                    let t = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    t = t.replace(/^([A-Z][\w\s\(\)\-\/]+)\./gm, '<b>$1.</b>');
+                    t = t.replace(/([\+\-]\d+\s+to\s+hit)/gi, '<span class="atk-highlight">$1</span>');
+                    t = t.replace(/(\d+\s?\(\d+d\d+(?:\s?[\+\-]\s?\d+)?\))/gi, '<span class="dmg-highlight">$1</span>');
+                    t = t.replace(/\n/g, '<br>');
+                    return `<span class="sb-text">${t}</span>`;
+                };
+
+                // --- PLAYER CHARACTER SHEET VIEW ---
+                if (entity.type === 'player') {
+                    content.innerHTML = `
+                <div class="inspect-img-col" style="background:#0b1d29;">${imgHtml}</div>
+                <div class="inspect-stat-col pc-sheet">
+                    <div class="sb-title">${entity.name}</div>
+                    <div class="sb-meta">Level ${entity.lvl} ${entity.race} ${entity.subclass}</div>
+                    <hr class="sb-hr">
+                    <div class="sb-attr">
+                        ${statBox('STR', entity.str || 10)} ${statBox('DEX', entity.dex || 10)} ${statBox('CON', entity.con || 10)}
+                        ${statBox('INT', entity.int || 10)} ${statBox('WIS', entity.wis || 10)} ${statBox('CHA', entity.cha || 10)}
+                    </div>
+                    <hr class="sb-hr">
+                    <div class="pc-detail-grid">
+                        <div class="pc-box">
+                            <h4>Combat Stats</h4>
+                            <div class="sb-row"><b>AC:</b> ${entity.ac}</div>
+                            <div class="sb-row"><b>HP:</b> ${entity.hp} / ${entity.maxHp}</div>
+                            <div class="sb-row"><b>Speed:</b> ${entity.speed}</div>
+                            <div class="sb-row"><b>Init:</b> ${entity.initMod >= 0 ? '+' + entity.initMod : entity.initMod}</div>
+                            <div class="sb-row"><b>Prof Bonus:</b> +${entity.prof || 2}</div>
+                        </div>
+                        <div class="pc-box">
+                            <h4>Senses & Casting</h4>
+                            <div class="sb-row"><b>Passive Perc:</b> ${entity.pp}</div>
+                            <div class="sb-row"><b>Spell DC:</b> ${entity.dc || "N/A"}</div>
+                            <div class="sb-row" style="margin-top:5px; font-size:0.8rem;"><b>Languages:</b> ${entity.languages}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="pc-box" style="margin-top:15px;">
+                        <h4>Attacks</h4>
+                        <div class="sb-text" style="font-family:monospace;">${entity.weapons || "No weapons listed."}</div>
+                    </div>
+
+                    ${entity.features ? `<div class="pc-box" style="margin-top:15px;"><h4>Features & Feats</h4><div class="sb-text" style="font-size:0.85rem;">${entity.features}</div></div>` : ''}
+                    ${entity.spells && entity.spells.length > 0 ? `<div class="pc-box" style="margin-top:15px;"><h4>Known Spells</h4><div class="sb-text" style="font-size:0.85rem;">${entity.spells}</div></div>` : ''}
+
+                    <div style="margin-top:20px; text-align:center;">
+                        <button class="btn" style="background:var(--blue-player);" onclick="Combat.add('${entity.name}', ${entity.initMod || 0}, ${entity.ac || 10}, ${entity.hp || 10}, ${entity.maxHp || 10}, 'player', 0, '${entity.img || ''}', State.party.find(p=>p.name==='${entity.name}'))">Add to Combat</button>
+                    </div>
+                </div>`;
+                }
+                // --- NPC/ENEMY STAT BLOCK VIEW ---
+                else {
+                    content.innerHTML = `
+                <div class="inspect-img-col">${imgHtml}</div>
+                <div class="inspect-stat-col">
+                    <div class="sb-title">${entity.name}</div>
+                    <div class="sb-meta">${entity.type || 'Unknown'}</div>
+                    <hr class="sb-hr">
+                    ${fmt('Armor Class', entity.ac)}
+                    ${fmt('Hit Points', `${entity.maxHp || entity.hp}`)}
+                    ${fmt('Speed', entity.speed)}
+                    <hr class="sb-hr">
+                    <div class="sb-attr">
+                        ${statBox('STR', entity.str || 10)} ${statBox('DEX', entity.dex || 10)} ${statBox('CON', entity.con || 10)}
+                        ${statBox('INT', entity.int || 10)} ${statBox('WIS', entity.wis || 10)} ${statBox('CHA', entity.cha || 10)}
+                    </div>
+                    <hr class="sb-hr">
+                    ${fmt('Saving Throws', entity.saves)}
+                    ${fmt('Skills', entity.skills)}
+                    ${fmt('Damage Resistances', entity.dmgRes)}
+                    ${fmt('Damage Immunities', entity.dmgImm)}
+                    ${fmt('Condition Immunities', entity.condImm)}
+                    ${fmt('Additional Feats', entity.feats)}
+                    ${fmt('Senses', entity.senses)}
+                    ${fmt('Languages', entity.languages)}
+                    ${fmt('Challenge', `${entity.cr} (${xp} XP)`)}
+                    <hr class="sb-hr">
+                    ${formatText(entity.traits)}
+                    ${entity.actions ? `<div class="sb-header">Actions</div>${formatText(entity.actions)}` : ''}
+                    ${entity.reactions ? `<div class="sb-header">Reactions</div>${formatText(entity.reactions)}` : ''}
+                    <div style="margin-top:20px; text-align:center;">
+                        <button class="btn" onclick="Combat.add('${entity.name}', ${entity.initMod || 0}, ${entity.ac || 10}, ${entity.hp || 10}, ${entity.hp || 10}, 'enemy', ${xp}, '${entity.img || ''}', State.library.enemies.find(e=>e.name==='${entity.name}')||State.library.npcs.find(n=>n.name==='${entity.name}'))">Add to Combat</button>
+                    </div>
+                </div>`;
+                }
+                modal.classList.add('open');
+            },
+
+            addConditionPrompt: (id) => {
+                Dialog.prompt("Enter condition (e.g. Blinded):", (cond) => { Combat.addCondition(id, cond); });
+            }
+        };
+
+        // --- STATIC DATA ---
+        const REFERENCE_TABLES = [
+            {
+                title: "Typical Difficulty Classes",
+                headers: ["Task Difficulty", "DC"],
+                rows: [
+                    ["Very Easy", "5"], ["Easy", "10"], ["Medium", "15"], ["Hard", "20"],
+                    ["Very Hard", "25"], ["Nearly Impossible", "30"]
+                ]
+            },
+            {
+                title: "Travel Pace",
+                headers: ["Pace", "Minute", "Hour", "Day", "Effect"],
+                rows: [
+                    ["Fast", "400 ft", "4 miles", "30 miles", "-5 Passive Perception"],
+                    ["Normal", "300 ft", "3 miles", "24 miles", "-"],
+                    ["Slow", "200 ft", "2 miles", "18 miles", "Able to use stealth"]
+                ]
+            },
+            {
+                title: "Cover",
+                headers: ["Degree", "Benefit"],
+                rows: [
+                    ["Half Cover", "+2 AC & Dex Saves"],
+                    ["Three-Quarters Cover", "+5 AC & Dex Saves"],
+                    ["Total Cover", "Can't be targeted directly"]
+                ]
+            },
+            {
+                title: "Light Sources",
+                headers: ["Source", "Bright", "Dim", "Duration"],
+                rows: [
+                    ["Candle", "5 ft", "+5 ft", "1 hr"],
+                    ["Torch", "20 ft", "+20 ft", "1 hr"],
+                    ["Lantern, Hooded", "30 ft", "+30 ft", "6 hr"],
+                    ["Lantern, Bullseye", "60 ft cone", "+60 ft", "6 hr"],
+                    ["Lamp", "15 ft", "+30 ft", "6 hr"],
+                    ["Light Spell", "20 ft", "+20 ft", "1 hr"]
+                ]
+            },
+            {
+                title: "Services & Hirelings",
+                headers: ["Service", "Cost"],
+                rows: [
+                    ["Coach Cab", "3 cp per mile"],
+                    ["Hireling, Skilled", "2 gp per day"],
+                    ["Hireling, Untrained", "2 sp per day"],
+                    ["Messenger", "2 cp per mile"],
+                    ["Road/Gate Toll", "1 cp"],
+                    ["Ship's Passage", "1 sp per mile"]
+                ]
+            },
+            {
+                title: "Food, Drink & Lodging",
+                headers: ["Item", "Cost"],
+                rows: [
+                    ["Ale, Gallon", "2 sp"], ["Ale, Mug", "4 cp"],
+                    ["Banquet (per person)", "10 gp"], ["Bread, Loaf", "2 cp"],
+                    ["Cheese, Hunk", "1 sp"], ["Inn (Squalid)", "7 cp"],
+                    ["Inn (Poor)", "1 sp"], ["Inn (Modest)", "5 sp"],
+                    ["Inn (Comfortable)", "8 sp"], ["Inn (Wealthy)", "2 gp"],
+                    ["Inn (Aristocratic)", "4 gp"], ["Meal (Squalid)", "3 cp"],
+                    ["Meal (Poor)", "6 cp"], ["Meal (Modest)", "3 sp"],
+                    ["Meal (Comfortable)", "8 sp"], ["Meal (Wealthy)", "2 gp"],
+                    ["Meal (Aristocratic)", "2 gp+"], ["Meat, Chunk", "3 sp"],
+                    ["Wine, Common (Pitcher)", "2 sp"], ["Wine, Fine (Bottle)", "10 gp"]
+                ]
+            },
+            {
+                title: "Encounter Distance",
+                headers: ["Terrain", "Distance"],
+                rows: [
+                    ["Arctic, Desert, Farmland", "6d6 x 10 ft"],
+                    ["Forest, Swamp, Hills", "2d8 x 10 ft"],
+                    ["Mountains", "4d10 x 10 ft"],
+                    ["Dungeon (Audible)", "2d6 x 10 ft"]
+                ]
+            }
+        ];
+
+        const CR_XP = {
+            "0": 10, "1/8": 25, "1/4": 50, "1/2": 100,
+            "1": 200, "2": 450, "3": 700, "4": 1100, "5": 1800,
+            "6": 2300, "7": 2900, "8": 3900, "9": 5000, "10": 5900,
+            "11": 7200, "12": 8400, "13": 10000, "14": 11500, "15": 13000,
+            "16": 15000, "17": 18000, "18": 20000, "19": 22000, "20": 25000,
+            "21": 33000, "22": 41000, "23": 50000, "24": 62000, "25": 75000,
+            "26": 90000, "27": 105000, "28": 120000, "29": 135000, "30": 155000
+        };
+        const CONDITIONS = {
+            "Blinded": "<ul><li>Can't see; auto-fail ability checks that require sight.</li><li>Attack rolls against you have advantage.</li><li>Your attack rolls have disadvantage.</li></ul>",
+            "Charmed": "<ul><li>Can't attack the charmer or target them with harmful abilities/effects.</li><li>The charmer has advantage on any ability check to interact socially with you.</li></ul>",
+            "Deafened": "<ul><li>Can't hear; auto-fail ability checks that require hearing.</li></ul>",
+            "Exhaustion": "<ul><li><b>Level 1:</b> Disadvantage on ability checks.</li><li><b>Level 2:</b> Speed halved.</li><li><b>Level 3:</b> Disadvantage on attack rolls and saving throws.</li><li><b>Level 4:</b> Hit point maximum halved.</li><li><b>Level 5:</b> Speed reduced to 0.</li><li><b>Level 6:</b> Death.</li></ul><p style='margin-top:5px; font-style:italic; font-size:0.8em;'>Finishing a Long Rest reduces exhaustion level by 1, if food and drink are ingested.</p>",
+            "Frightened": "<ul><li>Disadvantage on ability checks and attack rolls while the source of fear is within line of sight.</li><li>Can't willingly move closer to the source of fear.</li></ul>",
+            "Grappled": "<ul><li>Speed becomes 0, can't benefit from any bonus to speed.</li><li>Ends if the grappler is incapacitated.</li><li>Ends if an effect removes you from the reach of the grappler (e.g., <i>Thunderwave</i>).</li></ul>",
+            "Incapacitated": "<ul><li>Can't take actions or reactions.</li></ul>",
+            "Invisible": "<ul><li>Impossible to see without magic or special senses.</li><li>Heavily obscured for the purpose of hiding.</li><li>Location can still be detected by noise or tracks.</li><li>Attack rolls against you have disadvantage.</li><li>Your attack rolls have advantage.</li></ul>",
+            "Paralyzed": "<ul><li>Incapacitated. Can't move or speak.</li><li>Auto-fail Strength and Dexterity saves.</li><li>Attack rolls against you have advantage.</li><li>Any attack that hits is a <b>Critical Hit</b> if the attacker is within 5 feet.</li></ul>",
+            "Petrified": "<ul><li>Transformed into solid substance (usually stone). Weight x10, cease aging.</li><li>Incapacitated. Can't move or speak. Unaware of surroundings.</li><li>Attack rolls against you have advantage.</li><li>Auto-fail Strength and Dexterity saves.</li><li>Resistance to all damage.</li><li>Immune to poison and disease (poisons already in system are suspended).</li></ul>",
+            "Poisoned": "<ul><li>Disadvantage on attack rolls and ability checks.</li></ul>",
+            "Prone": "<ul><li>Only movement option is to crawl (spend extra movement).</li><li>Disadvantage on attack rolls.</li><li>Attack rolls against you have <b>Advantage</b> if attacker is within 5 feet.</li><li>Attack rolls against you have <b>Disadvantage</b> if attacker is further than 5 feet.</li></ul>",
+            "Restrained": "<ul><li>Speed becomes 0.</li><li>Attack rolls against you have advantage.</li><li>Your attack rolls have disadvantage.</li><li>Disadvantage on Dexterity saving throws.</li></ul>",
+            "Stunned": "<ul><li>Incapacitated. Can't move, can speak only falteringly.</li><li>Auto-fail Strength and Dexterity saves.</li><li>Attack rolls against you have advantage.</li></ul>",
+            "Unconscious": "<ul><li>Incapacitated. Can't move or speak. Unaware of surroundings.</li><li>Drop whatever you're holding and fall Prone.</li><li>Auto-fail Strength and Dexterity saves.</li><li>Attack rolls against you have advantage.</li><li>Any attack that hits is a <b>Critical Hit</b> if the attacker is within 5 feet.</li></ul>"
+        };
+        const ACTIONS = {
+            "Attack": "<ul><li><b>Melee:</b> Uses Strength (usually). Range 5ft.</li><li><b>Ranged:</b> Uses Dexterity. Disadvantage if hostile target is within 5ft.</li><li><b>Grapple/Shove:</b> Replaces one attack. Athletics vs Athletics/Acrobatics.</li><li><b>Unarmed:</b> 1 + Str Mod damage.</li></ul>",
+            "Cast a Spell": "<ul><li>Cast a spell with a casting time of <b>1 Action</b>.</li><li>Requires components (V, S, M).</li><li>If casting time is longer, you must spend your action every turn casting it to maintain progress.</li></ul>",
+            "Dash": "<ul><li>Gain extra movement for the current turn equal to your current Speed.</li><li>Any modifiers to speed (e.g., difficult terrain) apply to this extra movement.</li></ul>",
+            "Disengage": "<ul><li>Your movement does not provoke <b>Opportunity Attacks</b> for the rest of the turn.</li></ul>",
+            "Dodge": "<ul><li>Focus entirely on avoiding attacks. Until the start of your next turn:</li><li>Attack rolls against you have <b>Disadvantage</b> (if you can see the attacker).</li><li>You have <b>Advantage</b> on Dexterity saving throws.</li><li>Benefits are lost if Incapacitated or speed drops to 0.</li></ul>",
+            "Help": "<ul><li><b>Assist Ally:</b> Target gains Advantage on their next ability check (must be within working distance).</li><li><b>Distract Enemy:</b> Target an enemy within 5ft. The next attack roll against that enemy by an ally has Advantage.</li></ul>",
+            "Hide": "<ul><li>Make a <b>Dexterity (Stealth)</b> check vs opposing Passive Perception (or active search).</li><li>You must not be able to be seen (Heavily Obscured or behind Total Cover).</li><li>If you make noise or attack, you give away your position.</li></ul>",
+            "Ready": "<ul><li>Wait for a specific circumstance to act.</li><li><b>Define Trigger:</b> \"If X happens, I will do Y.\"</li><li><b>Reaction:</b> When trigger occurs, you can use your Reaction to take the action.</li><li><b>Spells:</b> You cast the spell immediately and hold it (Concentration) until the trigger releases it.</li></ul>",
+            "Search": "<ul><li>Devote your attention to finding something.</li><li>Depending on the nature of the search, the DM may call for a <b>Wisdom (Perception)</b> or <b>Intelligence (Investigation)</b> check.</li></ul>",
+            "Use an Object": "<ul><li>Interact with an object when it requires special care or repetition.</li><li>Examples: Drinking a potion, activating a magic item, or using a second object (if you already used your one free object interaction).</li></ul>"
+        };
+
+        // --- DATA I/O ---
+        const DataIO = {
+            export: () => {
+                // Rehydrate for export
+                const exportState = JSON.parse(JSON.stringify(State));
+                const fetchImgs = async (list) => {
+                    if (!list) return;
+                    for (let item of list) {
+                        if (item.img && item.img.startsWith('DB:')) {
+                            item.img = await DB.get(item.img.split(':')[1]);
+                        }
+                    }
+                };
+
+                (async () => {
+                    await fetchImgs(exportState.combatants);
+                    await fetchImgs(exportState.library.enemies);
+                    await fetchImgs(exportState.library.npcs);
+                    await fetchImgs(exportState.party);
+
+                    const data = { timestamp: Date.now(), version: "3.0", state: exportState };
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.href = url; a.download = `arbiter-backup.json`;
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                })();
+            },
+            import: (file) => {
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const json = JSON.parse(e.target.result);
+                        if (!json.state) throw new Error("Invalid format.");
+                        Dialog.confirm(`Load backup?<br>Overwrites data.`, async () => {
+                            State.combatants = json.state.combatants || [];
+                            State.library = json.state.library || { enemies: [], npcs: [] };
+                            State.encounters = json.state.encounters || {};
+                            State.party = json.state.party || [];
+                            State.customRules = json.state.customRules || [];
+                            State.customTables = json.state.customTables || [];
+                            State.notes = json.state.notes || "";
+                            State.settingNotes = json.state.settingNotes || "";
+                            State.useMetric = json.state.useMetric || false;
+                            await Storage.save(); // Save to DB
+                            Utils.toast("Restored!");
+                            Render.page();
+                        }, "Restore");
+                    } catch (err) { Dialog.alert("Error: " + err.message); }
+                };
+                reader.readAsText(file);
+            },
+            nuke: () => {
+                Dialog.confirm("HARD RESET: Delete ALL data?", () => {
+                    Dialog.confirm("Cannot be undone.", async () => {
+                        State.isResetting = true;
+                        window.removeEventListener('beforeunload', Storage.save);
+                        await DB.clear();
+                        localStorage.clear();
+                        location.reload();
+                    }, "Final Warning");
+                }, "Factory Reset");
+            }
+        };
+        // --- INIT ---
+        window.onload = async () => {
+            await Storage.load(); // Now async to wait for DB images
+            Router.go('tracker');
+            window.addEventListener('beforeunload', () => Storage.save());
+            setInterval(() => Storage.save(), 30000); // Auto-save every 30s
+        };
+    </script>
+</body>
+
+</html> 

@@ -1,0 +1,2402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grim Hollow Setting Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=MedievalSharp&family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        :root {
+            /* Palette: Edgy Grim Hollow */
+            --bg-dark: #0a0a0a;
+            --bg-sidebar: #110f0f;
+            --sidebar-border: #2a2a2a;
+
+            /* The Red Tone */
+            --accent-red: #8b0000;
+            --accent-red-bright: #b30000;
+            --accent-gold: #c5a059;
+
+            /* Parchment texture */
+            --parchment: #e3dac1;
+            --parchment-dark: #d4c5a3;
+
+            /* Text Colors */
+            --text-light: #e0e0e0;
+            --text-muted: #888;
+            --text-dark: #1a1a1a;
+
+            /* Fonts */
+            --font-header: 'Cinzel', serif;
+            --font-body: 'Lato', sans-serif;
+            --font-script: 'MedievalSharp', cursive;
+        }
+
+        * {
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-red) var(--bg-dark);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: var(--font-body);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231a0505' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        /* --- SIDEBAR --- */
+        #sidebar {
+            width: 280px;
+            background-color: var(--bg-sidebar);
+            border-right: 2px solid var(--accent-red);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            flex-shrink: 0;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .brand {
+            font-family: var(--font-header);
+            font-weight: 900;
+            color: var(--accent-red);
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(139, 0, 0, 0.4);
+            border-bottom: 1px solid var(--sidebar-border);
+            padding-bottom: 20px;
+        }
+
+        .menu-section {
+            margin-bottom: 20px;
+        }
+
+        .menu-header {
+            font-family: var(--font-header);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 20px;
+            margin-bottom: 10px;
+        }
+
+        .nav-item {
+            padding: 12px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-header);
+            font-size: 0.95rem;
+            border-left: 3px solid transparent;
+            color: var(--text-light);
+        }
+
+        .nav-item:hover {
+            background: rgba(139, 0, 0, 0.1);
+            color: var(--accent-red-bright);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(139, 0, 0, 0.2), transparent);
+            border-left: 3px solid var(--accent-red);
+            color: var(--accent-red-bright);
+            text-shadow: 0 0 8px rgba(139, 0, 0, 0.3);
+        }
+
+        .nav-item i {
+            font-size: 1.1rem;
+        }
+
+        /* --- MAIN CONTENT AREA --- */
+        #main-content {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+            background: radial-gradient(circle at center, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.6) 100%);
+        }
+
+        /* Sections are hidden by default, shown via JS */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1.section-title {
+            font-family: var(--font-header);
+            color: var(--parchment);
+            font-size: 2.5rem;
+            border-bottom: 2px solid var(--accent-red);
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* --- CARDS GRID --- */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        /* THE CARD STYLE */
+        .lore-card {
+            background: var(--parchment);
+            color: var(--text-dark);
+            border: 1px solid #5c4033;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .lore-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(139, 0, 0, 0.3);
+            border-color: var(--accent-red);
+        }
+
+        /* A "Blood Stain" effect on hover */
+        .lore-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--accent-red);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+            transform-origin: left;
+        }
+
+        .lore-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-header {
+            background: var(--parchment-dark);
+            padding: 15px;
+            border-bottom: 1px solid #a39276;
+            font-family: var(--font-header);
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 15px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            border-radius: 2px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        /* Expandable content simulation */
+        .expand-hint {
+            display: block;
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: var(--accent-red);
+            font-weight: bold;
+            text-align: right;
+            font-family: var(--font-header);
+        }
+
+        /* --- MECHANICS LIST STYLE --- */
+        .mechanic-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .mechanic-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid var(--accent-red);
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .mechanic-item:hover {
+            background: rgba(139, 0, 0, 0.2);
+        }
+
+        .mechanic-title {
+            font-family: var(--font-header);
+            font-size: 1.2rem;
+            color: var(--accent-gold);
+        }
+
+        /* --- TIMELINE STYLE --- */
+        .timeline {
+            position: relative;
+            margin-left: 20px;
+            border-left: 2px solid var(--accent-red);
+            padding-left: 30px;
+        }
+
+        .timeline-event {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .timeline-event::before {
+            content: "";
+            position: absolute;
+            left: -36px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            background: var(--bg-dark);
+            border: 2px solid var(--accent-red);
+            border-radius: 50%;
+        }
+
+        .year {
+            font-family: var(--font-header);
+            color: var(--accent-red);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .event-desc {
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+
+        /* --- MODAL POPUP STYLES --- */
+        .modal-overlay {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            /* Force on top */
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-active {
+            display: flex !important;
+            /* Force display when active */
+        }
+
+        .modal-window {
+            background: var(--parchment);
+            color: var(--text-dark);
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            padding: 40px;
+            border: 2px solid var(--accent-red);
+            box-shadow: 0 0 50px rgba(139, 0, 0, 0.5);
+            overflow-y: auto;
+            position: relative;
+            border-radius: 4px;
+            animation: modalSlide 0.3s ease-out;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 2rem;
+            color: var(--accent-red);
+            cursor: pointer;
+            font-family: var(--font-header);
+            font-weight: bold;
+        }
+
+        .modal-close-btn:hover {
+            color: #000;
+        }
+
+        .modal-title {
+            font-family: var(--font-header);
+            font-size: 2.2rem;
+            color: var(--accent-red);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .modal-subtitle {
+            font-family: var(--font-body);
+            font-weight: bold;
+            color: #5c4033;
+            font-size: 1.1rem;
+            border-bottom: 2px solid var(--accent-gold);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .modal-text {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            white-space: pre-line;
+        }
+
+        @keyframes modalSlide {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Hide mobile controls on desktop */
+        #mobile-btn,
+        #mobile-overlay {
+            display: none;
+        }
+
+        /* MOBILE STYLES */
+        @media (max-width: 900px) {
+
+            /* 1. Mobile Menu Button */
+            #mobile-btn {
+                display: block;
+                position: fixed;
+                top: 15px;
+                left: 15px;
+                z-index: 1000;
+                background: rgba(0, 0, 0, 0.8);
+                color: var(--accent-red);
+                border: 1px solid var(--accent-red);
+                font-size: 1.5rem;
+                padding: 5px 10px;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            /* 2. Transform Sidebar into a Slide-out Drawer */
+            #sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 260px;
+                transform: translateX(-100%);
+                /* Hidden by default */
+                transition: transform 0.3s ease;
+                z-index: 999;
+            }
+
+            #sidebar.mobile-open {
+                transform: translateX(0);
+                /* Slide in */
+            }
+
+            /* 3. Dark Overlay */
+            #mobile-overlay.active {
+                display: block;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 900;
+                backdrop-filter: blur(2px);
+            }
+
+            /* 4. Adjust Main Content Area */
+            #main-content {
+                width: 100%;
+                padding: 70px 20px 20px 20px;
+                /* Top padding for the button */
+            }
+
+            /* 5. Force Cards to Stack vertically */
+            .card-grid {
+                grid-template-columns: 1fr;
+                /* Single column */
+                gap: 20px;
+            }
+
+            /* 6. Form Adjustments */
+            #figure-form-container div[style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* 7. Modal Tweaks */
+            .modal-window {
+                width: 95%;
+                padding: 20px;
+                max-height: 80vh;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <button id="mobile-btn" onclick="toggleSidebar()"><i class="ph ph-list"></i></button>
+    <div id="mobile-overlay" onclick="toggleSidebar()"></div>
+    <nav id="sidebar">
+        <div class="brand">Grim Hollow</div>
+
+        <div class="menu-section">
+            <div class="menu-header">The World</div>
+            <div class="nav-item active" onclick="showSection('etharis')">
+                <i class="ph ph-globe-hemisphere-west"></i> Etharis
+            </div>
+            <div class="nav-item" onclick="showSection('factions')">
+                <i class="ph ph-flag-banner"></i> Factions
+            </div>
+            <div class="nav-item" onclick="showSection('history')">
+                <i class="ph ph-scroll"></i> History
+            </div>
+            <div class="nav-item" onclick="showSection('religion')">
+                <i class="ph ph-cross"></i> Religion
+            </div>
+            <div class="nav-item" onclick="showSection('renowned-page')">
+                <i class="ph ph-crown"></i> Renowned Figures
+            </div>
+        </div>
+
+    </nav>
+
+    <main id="main-content">
+
+        <section id="etharis" class="content-section active">
+            <h1 class="section-title">The Realms of Etharis</h1>
+            <div class="card-grid">
+                <div class="lore-card" onclick="showSection('burach-page')">
+                    <div class="card-header">
+                        The Bürach Empire <span class="tag">Empire</span>
+                    </div>
+                    <div class="card-body">
+                        Four provinces bound by a dying god. A land of order, inquisitions, and the Hearthkeepers.
+                        <span class="expand-hint">View Cities & Entities <i class="ph ph-arrow-right"></i></span>
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="showSection('ostoya-page')">
+                    <div class="card-header">
+                        The Ostoyan Empire <span class="tag">Vampiric</span>
+                    </div>
+                    <div class="card-body">
+                        A land shrouded in eternal night, ruled by the Crimson Court below and mages above.
+                        <span class="expand-hint">View Cities & Entities <i class="ph ph-arrow-right"></i></span>
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="showSection('valikan-page')">
+                    <div class="card-header">
+                        The Valikan Clans <span class="tag">Tribal</span>
+                    </div>
+                    <div class="card-body">
+                        Raiders of the frozen north. The Prismatic Circle keeps the Great Wyrm slumbering.
+                        <span class="expand-hint">View Cities & Entities <i class="ph ph-arrow-right"></i></span>
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="showSection('castinella-page')">
+                    <div class="card-header">
+                        Castinella <span class="tag">Theocracy</span>
+                    </div>
+                    <div class="card-body">
+                        Sun-scorched lands of the Arcanist Inquisition. Magic is heresy, and fire is the cure.
+                        <span class="expand-hint">View Cities & Entities <i class="ph ph-arrow-right"></i></span>
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="showSection('charneault-page')">
+                    <div class="card-header">
+                        Charneault Kingdom <span class="tag">Fey</span>
+                    </div>
+                    <div class="card-body">
+                        A land of chivalry and dark fey spirits. The mists hide knights and spirits alike.
+                        <span class="expand-hint">View Cities & Entities <i class="ph ph-arrow-right"></i></span>
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="showSection('morencia-page')">
+                    <div class="card-header">
+                        Morencia <span class="tag">City State</span>
+                    </div>
+                    <div class="card-body">
+                        A wealthy trading city of canals, bankers, and deadly assassins.
+                        <span class="expand-hint">View Cities & Entities <i class="ph ph-arrow-right"></i></span>
+                    </div>
+                </div>
+                <div class="lore-card" onclick="showSection('liesech-page')">
+                    <div class="card-header">
+                        Liesech <span class="tag" style="border-color: #556b2f; color: #556b2f;">Plagued</span>
+                    </div>
+                    <div class="card-body">
+                        A wealthy port city consumed by the Weeping Pox. Ruled by a vampire countess and a cult of disease.
+                        <span class="expand-hint">View Cities & Entities <i class="ph ph-arrow-right"></i></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="liesech-page" class="content-section">
+            <div style="margin-bottom: 20px; cursor: pointer; color: var(--accent-red);" onclick="showSection('etharis')">
+                <i class="ph ph-arrow-left"></i> Back to Etharis
+            </div>
+        
+            <h1 class="section-title">The City of Liesech</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid #556b2f; padding-left: 15px;">
+                "No knowledge should be feared, because knowledge is power."<br>
+                Once a wealthy trade hub in Bite Bay, Liesech is now a quarantined nightmare. The <strong>Weeping Pox</strong>
+                rots the living, while the <strong>Morbus Doctore</strong> experiment on the dying.
+            </p>
+        
+            <h2 style="color: #556b2f; margin-top: 40px; border-bottom: 1px solid #333;">
+                The Rotting History <span style="font-size: 0.6em; color: #666;">Deals in the Dark</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: #556b2f;">
+                    <div class="card-header" style="color: #556b2f;">The Bouwengracht Bargain</div>
+                    <div class="card-body">
+                        Generations ago, the fisherman Otto Bouwengracht made a pact with the <strong>Filth Gazer</strong>, a
+                        creature in the bay. The creature consumed the city's filth and corpses; in exchange, the family
+                        received wealth and power.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #556b2f;">
+                    <div class="card-header" style="color: #556b2f;">The Red Morning</div>
+                    <div class="card-body">
+                        The Vampire Countess <strong>Analita von Raiza</strong> infiltrated the city to seize it for the Bürach
+                        Empire. Discovering the source of the family's power, she slaughtered the entire Bouwengracht family in
+                        a single night to break their bond with the creature.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #556b2f;">
+                    <div class="card-header" style="color: #556b2f;">The Weeping Pox</div>
+                    <div class="card-body">
+                        Enraged by the broken pact, the Filth Gazer infected the city's corpses with a virulent plague.
+                        <br><strong>Symptoms:</strong> Sharpened senses, delirium, burning fever, and weltering lesions.
+                    </div>
+                </div>
+            </div>
+        
+            <h2 style="color: #8a2be2; margin-top: 40px; border-bottom: 1px solid #333;">
+                Factions of the Quarantine
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card">
+                    <div class="card-header">Cult of the Black Lady</div>
+                    <div class="card-body">
+                        Fanatics who worship the Vampire Countess Analita. They believe beauty can be found even in the rot.
+                        They kidnap non-infected citizens to feed their regenerating mistress in the High Belfry.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Morbus Doctore</div>
+                    <div class="card-body">
+                        Physicians wearing beak masks and strange coats. They believe the Pox is an evolutionary blessing. They
+                        wander the streets conducting unbearable experiments on "patients" to bring humanity to a new level of
+                        existence.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Golden Barge Company</div>
+                    <div class="card-body">
+                        The last remnant of honorable trade. They transport goods and people along the canals. Neutral and
+                        devoted to duty, they are the only safe way to travel—if you have the coin.
+                    </div>
+                </div>
+            </div>
+        
+            <h2 style="color: #2f4f4f; margin-top: 40px; border-bottom: 1px solid #333;">
+                Notable Locations
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: #2f4f4f;">
+                    <div class="card-header" style="color: #2f4f4f;">The High Belfry</div>
+                    <div class="card-body">
+                        A massive bell tower that serves as the seat of power. Countess Analita sleeps at the top, regenerating
+                        from her battle with the Filth Gazer.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #2f4f4f;">
+                    <div class="card-header" style="color: #2f4f4f;">The Eye of the Sea</div>
+                    <div class="card-body">
+                        The center of the bay where the <strong>Filth Gazer</strong> dwells. No ship returns from here. It is
+                        said to be a churning vortex of pollution and tentacles.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #2f4f4f;">
+                    <div class="card-header" style="color: #2f4f4f;">The Froth Church</div>
+                    <div class="card-body">
+                        Once the center of the "Cult of the Sea," built on the westernmost quay. A channel allows the sea water
+                        (and the creature) to enter directly into the church for dark offerings.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="factions" class="content-section">
+            <h1 class="section-title">Major Factions</h1>
+
+            <div class="card-grid">
+                <div class="lore-card" style="border-left: 4px solid var(--accent-red);"
+                    onclick="showSection('inquisition-page')">
+                    <div class="card-header">Arcanist Inquisition <span class="tag">Hunter</span></div>
+                    <div class="card-body">
+                        Zealots of the Castinellan Provinces dedicated to eradicating arcane magic.
+                        <span class="expand-hint">View Details <i class="ph ph-arrow-right"></i></span>
+                    </div>
+                </div>
+
+                <div class="lore-card" style="border-left: 4px solid #8a2be2;"
+                    onclick="showSection('thaumaturge-page')">
+                    <div class="card-header">The Thaumaturge <span class="tag"
+                            style="color:#8a2be2; border-color:#8a2be2">Mages</span></div>
+                    <div class="card-body">
+                        A secret confederation of Archmages who shape the world from the shadows to prevent apocalypse.
+                        <span class="expand-hint">View Details <i class="ph ph-arrow-right"></i></span>
+                    </div>
+                </div>
+
+                <div class="lore-card" style="border-left: 4px solid var(--accent-gold);"
+                    onclick="showSection('hearthkeepers-page')">
+                    <div class="card-header">The Hearthkeepers <span class="tag"
+                            style="color:var(--accent-gold); border-color:var(--accent-gold)">Religious</span></div>
+                    <div class="card-body">
+                        The true rulers of the Bürach Empire. They uphold the law of Aurelia and suppress the truth of
+                        the Beast.
+                        <span class="expand-hint">View Details <i class="ph ph-arrow-right"></i></span>
+                    </div>
+                </div>
+
+                <div class="lore-card" style="border-left: 4px solid #444;" onclick="showSection('ebon-page')">
+                    <div class="card-header">The Ebon Syndicate <span class="tag"
+                            style="color:#aaa; border-color:#aaa">Criminal</span></div>
+                    <div class="card-body">
+                        "The Night is Our Kingdom." The absolute rulers of the underworld, controlling everything from
+                        theft to
+                        assassination.
+                        <span class="expand-hint">View Details <i class="ph ph-arrow-right"></i></span>
+                    </div>
+                </div>
+
+                <div class="lore-card" style="border-left: 4px solid #5a0000;" onclick="showSection('crimson-page')">
+                    <div class="card-header">The Crimson Court <span class="tag">Vampire</span></div>
+                    <div class="card-body">
+                        The vampire aristocracy of Ostoya. They view humans as cattle and rule with eternal, bloodied
+                        iron.
+                        <span class="expand-hint">View Details <i class="ph ph-arrow-right"></i></span>
+                    </div>
+                </div>
+
+                <div class="lore-card" style="border-left: 4px solid #777;" onclick="showSection('freeswords-page')">
+                    <div class="card-header">Company of Free Swords <span class="tag"
+                            style="color:#fff; border-color:#fff">Mercenary</span></div>
+                    <div class="card-body">
+                        "Blood and Honor." The most elite mercenary company in Etharis. They slay demons and topple
+                        kings—for a
+                        price.
+                        <span class="expand-hint">View Details <i class="ph ph-arrow-right"></i></span>
+                    </div>
+                </div>
+
+                <div class="lore-card" style="border-left: 4px solid #2e8b57;" onclick="showSection('augustine-page')">
+                    <div class="card-header">Augustine Trading Co. <span class="tag"
+                            style="color:#2e8b57; border-color:#2e8b57">Merchant</span></div>
+                    <div class="card-body">
+                        A Morencia-based mega-corporation that breeds monsters for war and holds nations in debt.
+                        <span class="expand-hint">View Details <i class="ph ph-arrow-right"></i></span>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <section id="burach-page" class="content-section">
+            <div style="margin-bottom: 20px; cursor: pointer; color: var(--accent-red);"
+                onclick="showSection('etharis')">
+                <i class="ph ph-arrow-left"></i> Back to Etharis
+            </div>
+
+            <h1 class="section-title">The Bürach Empire</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid var(--accent-red); padding-left: 15px;">
+                Once the beacon of civilization, now a shattering nation. The Gods are dead, and the
+                <strong>Great Beast</strong> stalks the countryside. The Empire is divided into four distinct provinces.
+            </p>
+
+            <h2 style="color: var(--accent-gold); margin-top: 40px; border-bottom: 1px solid #333;">
+                Abendland <span style="font-size: 0.6em; color: #666;">The Heart of the Empire</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card">
+                    <div class="card-header">Altenheim (Capital)</div>
+                    <div class="card-body">
+                        The "City of Joy." The largest city in the Empire and seat of the Imperial Throne.
+                        It is sustained by the trade of the entire continent but rots from within due to decadence and
+                        the drugs known as <i>Dream Leaves</i>.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Key Entities</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li style="margin-bottom:5px;"><strong>Emperor Aratron II:</strong> The boy emperor, a
+                                figurehead controlled by the church.</li>
+                            <li style="margin-bottom:5px;"><strong>Pope Roland Murrich:</strong> Leader of the
+                                <em>Hearthkeepers</em> and the true power behind the throne.
+                            </li>
+                            <li><strong>Gatekeeper Chantal Sommerkin:</strong> Leader of the <em>Celestial Gate</em>, a
+                                doomsday cult growing in power.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Castle Martorius</div>
+                    <div class="card-body">
+                        The floating, shifting castle of the Archmage Martorius. It appeared after the Gods' End.
+                        Martorius advises the crown, but his true motives remain a mystery.
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color: var(--accent-gold); margin-top: 40px; border-bottom: 1px solid #333;">
+                Nordenland <span style="font-size: 0.6em; color: #666;">The Magical & The Wild</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card">
+                    <div class="card-header">Erlefurt (West Capital)</div>
+                    <div class="card-body">
+                        Loyal to the Empire. Home to the <strong>Magister College</strong>, the premier academy for
+                        arcane magic.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Ulmirac (East Capital)</div>
+                    <div class="card-body">
+                        Independent and rebellious. Home to the <strong>Order of the Golden Bough</strong> (Druids).
+                        They reject Imperial rule and follow the Old Ways.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Key Entities</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li style="margin-bottom:5px;"><strong>Arch Duchess Maelfa:</strong> Ruler of the West,
+                                maintaining a delicate peace with the Empire.</li>
+                            <li><strong>Patriarch Alfric:</strong> Leader of the Oaken Court in the East, keeping
+                                outsiders at bay.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color: var(--accent-gold); margin-top: 40px; border-bottom: 1px solid #333;">
+                Rauland <span style="font-size: 0.6em; color: #666;">Iron & Industry</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card">
+                    <div class="card-header">Stehlenwald</div>
+                    <div class="card-body">
+                        The city of steel. Once a dwarven stronghold, now the industrial heart of the Empire. The smog
+                        here is thick enough to choke on.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Gräffendam</div>
+                    <div class="card-body">
+                        A massive dam city. The rich live on top in the "Gildreath," while the poor rot in the slums
+                        below known as "The Shade," controlled by the <strong>Ebon Syndicate</strong>.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Key Entities</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li style="margin-bottom:5px;"><strong>Arch Duke Ulrich Eisenherz:</strong> A fair dwarven
+                                ruler rumored to possess a god's artifact.</li>
+                            <li><strong>Artom Drago:</strong> A lycanthrope hunter who leads a pack of werewolves to
+                                fight the Beast's spawn.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color: var(--accent-gold); margin-top: 40px; border-bottom: 1px solid #333;">
+                Unterland <span style="font-size: 0.6em; color: #666;">The Shield of the Empire</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card">
+                    <div class="card-header">Olstenburg</div>
+                    <div class="card-body">
+                        A city of warriors. Home to the <strong>Academy of Swords</strong>. Every citizen here serves
+                        military duty to hold back the Ostoyan undead.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Key Entities</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li style="margin-bottom:5px;"><strong>Lord General Vassily Roemer:</strong> A brilliant but
+                                traditional commander focused on the Ostoyan war.</li>
+                            <li><strong>Speaker Coran Schlei:</strong> Leader of the <em>Cult of Tormach</em> (Daemon of
+                                Wrath), seeking to usurp command.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ostoya-page" class="content-section">
+            <div style="margin-bottom: 20px; cursor: pointer; color: var(--accent-red);"
+                onclick="showSection('etharis')">
+                <i class="ph ph-arrow-left"></i> Back to Etharis
+            </div>
+
+            <h1 class="section-title">The Ostoyan Empire</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid var(--accent-red); padding-left: 15px;">
+                A land where the sun never fully rises. The <strong>Dark Mist</strong> covers the sky, protecting the
+                undead nobility from the light.
+                It is a nation divided: the vampires ruling the south, and the mages holding the north.
+            </p>
+
+            <h2 style="color: var(--accent-red); margin-top: 40px; border-bottom: 1px solid #333;">
+                Soma <span style="font-size: 0.6em; color: #666;">The Land of Eternal Night</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card">
+                    <div class="card-header">Nov Ostoya (Capital)</div>
+                    <div class="card-body">
+                        The City of Gargoyles. The massive capital where vampires and humans coexist in a terrified
+                        peace.
+                        The city is literally built on top of the sinking ruins of an older city, creating the "City
+                        Below."
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Crow's Bend</div>
+                    <div class="card-body">
+                        A river port city constantly plagued by zombie outbreaks. The river itself is often clogged with
+                        corpses floating down from the interior.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Key Entities</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li style="margin-bottom:5px;"><strong>Grand Duke Drago Koshevek:</strong> The vampire ruler
+                                of Soma. Cruel but efficient.</li>
+                            <li style="margin-bottom:5px;"><strong>The Crimson Court:</strong> The vampire nobility.
+                                They view humans as cattle to be managed, not citizens.</li>
+                            <li><strong>The Order of Dawn:</strong> A secret organization of hunters dedicated to
+                                destroying the undead scourge.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color: #6a5acd; margin-top: 40px; border-bottom: 1px solid #333;">
+                Raevo <span style="font-size: 0.6em; color: #666;">The Resistance</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: #6a5acd;">
+                    <div class="card-header" style="color: #6a5acd;">Castalore</div>
+                    <div class="card-body">
+                        The fortress of mages. The seat of Raevo's power, protected by magical barriers that keep the
+                        vampires and the dark mist at bay.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #6a5acd;">
+                    <div class="card-header" style="color: #6a5acd;">Malkovia</div>
+                    <div class="card-body">
+                        A fortress city on the border. It is the first line of defense against the Bürach Empire and the
+                        vampire legions of Soma.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #6a5acd;">
+                    <div class="card-header" style="color: #6a5acd;">Key Entities</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li style="margin-bottom:5px;"><strong>General Arakon:</strong> The leader of the Raevo
+                                military, a tactical genius holding the line.</li>
+                            <li><strong>The Ostoyan Mages:</strong> Wielders of forbidden magic who believe only fire
+                                and arcane might can save humanity.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="valikan-page" class="content-section">
+            <div style="margin-bottom: 20px; cursor: pointer; color: var(--accent-red);"
+                onclick="showSection('etharis')">
+                <i class="ph ph-arrow-left"></i> Back to Etharis
+            </div>
+
+            <h1 class="section-title">The Valikan Clans</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid var(--accent-red); padding-left: 15px;">
+                A harsh, frozen landscape where survival is the only law. The clans are split into two rival nations.
+                Beneath the ice sleeps <strong>Gormadraug</strong>, the Great Prismatic Wyrm, whose waking would end the
+                world.
+            </p>
+
+            <h2 style="color: #607d8b; margin-top: 40px; border-bottom: 1px solid #333;">
+                Thrull <span style="font-size: 0.6em; color: #666;">The Raiders</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: #607d8b;">
+                    <div class="card-header" style="color: #607d8b;">Tyburn</div>
+                    <div class="card-body">
+                        A brutal city of raiders and shipwrights. The economy runs on pillage and slavery. Weakness here
+                        is a
+                        death sentence.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #607d8b;">
+                    <div class="card-header" style="color: #607d8b;">Key Entities</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li style="margin-bottom:5px;"><strong>Chief Knan:</strong> A ruthless warlord who seeks to
+                                unite
+                                the clans through strength and conquest.</li>
+                            <li><strong>The Rune-Keepers:</strong> Mystics who carve magical runes into flesh and stone
+                                to
+                                harness the power of the cold.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color: var(--accent-gold); margin-top: 40px; border-bottom: 1px solid #333;">
+                Kandar <span style="font-size: 0.6em; color: #666;">The Traders</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card">
+                    <div class="card-header">Halsfjord (Capital)</div>
+                    <div class="card-body">
+                        A heavily fortified port city. Unlike Thrull, Kandar seeks trade with the south. They are the
+                        shield
+                        that protects the civilized world from Thrull's raids.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Solheim</div>
+                    <div class="card-body">
+                        The northernmost reach, home to the Cult of the Wyrm. The ice here is strange, glowing with the
+                        sleeping
+                        dreams of Gormadraug.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Key Entities</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li style="margin-bottom:5px;"><strong>Queen Andrea Helsing:</strong> The ruler of Kandar,
+                                struggling to maintain alliances against the Thrull threat.</li>
+                            <li><strong>The Prismatic Circle:</strong> Powerful druids who maintain the elemental seals
+                                keeping
+                                Gormadraug asleep.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="castinella-page" class="content-section">
+            <div style="margin-bottom: 20px; cursor: pointer; color: var(--accent-red);"
+                onclick="showSection('etharis')">
+                <i class="ph ph-arrow-left"></i> Back to Etharis
+            </div>
+
+            <h1 class="section-title">The Castinellan Provinces</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid var(--accent-red); padding-left: 15px;">
+                A land of scorching heat and burning faith. Unified by the warlord <strong>Montego Valieda</strong>, the
+                three
+                provinces are a militaristic theocracy dedicated to the Arch Seraph Empyreus. Arcane magic is punishable
+                by
+                death.
+            </p>
+
+            <h2 style="color: var(--accent-red); margin-top: 40px; border-bottom: 1px solid #333;">
+                Toletum <span style="font-size: 0.6em; color: #666;">The Military Heart</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card">
+                    <div class="card-header">Toletum City</div>
+                    <div class="card-body">
+                        The seat of the Theocracy. A fortress city where children are trained in the spear and bow from
+                        age
+                        seven.
+                        The <strong>Ember Forge</strong> here never goes cold, churning out weapons for the righteous
+                        war.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Key Entities</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li style="margin-bottom:5px;"><strong>Montego Valieda:</strong> "The Uniter." The High
+                                Commander
+                                who conquered the provinces and forged them into a single nation.</li>
+                            <li><strong>The Inquisitors:</strong> Zealots who roam the streets looking for signs of
+                                arcane
+                                corruption.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color: var(--accent-gold); margin-top: 40px; border-bottom: 1px solid #333;">
+                Faro <span style="font-size: 0.6em; color: #666;">The Golden Harbor</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card">
+                    <div class="card-header">Faro City</div>
+                    <div class="card-body">
+                        The economic powerhouse. Home to the <strong>Great Arsenal</strong> shipyard.
+                        While Toletum rules the land, Faro rules the sea. The surrounding land, "The Blessing," feeds
+                        the entire
+                        nation.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Key Entities</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li style="margin-bottom:5px;"><strong>The Mighty Farosi Fleet:</strong> The strongest naval
+                                force
+                                in Etharis, projecting Castinellan power across the continent.</li>
+                            <li><strong>Guild Navigators:</strong> The only sailors skilled enough to navigate the
+                                treacherous
+                                Misty Reefs near Morencia.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color: #d35400; margin-top: 40px; border-bottom: 1px solid #333;">
+                Therpena <span style="font-size: 0.6em; color: #666;">The Dragon's Breath</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card">
+                    <div class="card-header">The Shattered Peaks</div>
+                    <div class="card-body">
+                        Home to the <strong>Cathedral of Embers</strong>, the headquarters of the Arcanist Inquisition.
+                        It is also the ancestral home of the Dragonborn (the Ember Cairn), who serve as the Theocracy's
+                        shock
+                        troops.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">High Cavalry School</div>
+                    <div class="card-body">
+                        Producing the finest mounted warriors in the world. Their heavy cavalry charges are said to
+                        shake the
+                        earth like an earthquake.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Key Entities</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li style="margin-bottom:5px;"><strong>Aban Dahlrum:</strong> "The Red Horse," a legendary
+                                instructor of the cavalry.</li>
+                            <li><strong>Arch Seraph Empyreus:</strong> The patron deity of the nation. He demands Valor,
+                                Truth,
+                                and the purging of magic.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="charneault-page" class="content-section">
+            <div style="margin-bottom: 20px; cursor: pointer; color: var(--accent-red);"
+                onclick="showSection('etharis')">
+                <i class="ph ph-arrow-left"></i> Back to Etharis
+            </div>
+
+            <h1 class="section-title">The Charneault Kingdom</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid var(--accent-red); padding-left: 15px;">
+                A realm of chivalry, mystery, and broken oaths. Protected by the <strong>Knight Chapters</strong> and
+                bound by
+                the <strong>Pact of the Sacred Land</strong>, humans and elves share this mist-shrouded land. But the
+                spirits
+                are restless, and the Dark Elves stir.
+            </p>
+
+            <h2 style="color: #2e8b57; margin-top: 40px; border-bottom: 1px solid #333;">
+                Caer Neiada <span style="font-size: 0.6em; color: #666;">The Land of Rivers</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: #2e8b57;">
+                    <div class="card-header" style="color: #2e8b57;">Castle Lamesdhonneur</div>
+                    <div class="card-body">
+                        The capital, built amidst massive waterfalls. It is the seat of <strong>King Thibault de
+                            Sauveterre</strong>.
+                        The "Blade of Honor" is the heart of human power, but it is plagued by political infighting
+                        among the
+                        Knight Chapters.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #2e8b57;">
+                    <div class="card-header" style="color: #2e8b57;">Tol Leyemil</div>
+                    <div class="card-body">
+                        The last great Elven city, hidden deep within the forests. It is a place of ancient magic, ruled
+                        by the
+                        <strong>Assembly of Elves</strong>.
+                        Humans are rarely welcome here, and tensions are high as the Dark Elves infiltrate its society.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #2e8b57;">
+                    <div class="card-header" style="color: #2e8b57;">Key Entities</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li style="margin-bottom:5px;"><strong>King Thibault:</strong> A weary king trying to save
+                                his
+                                cursed daughter and hold his fracturing kingdom together.</li>
+                            <li style="margin-bottom:5px;"><strong>The Bondmakers:</strong> Elven shamans who maintain
+                                the pact
+                                with nature spirits.</li>
+                            <li><strong>The Severe Templars:</strong> A fanatical knight chapter that hates elves and
+                                magic,
+                                seeking to purge the land of "fey corruption."</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color: #8a2be2; margin-top: 40px; border-bottom: 1px solid #333;">
+                The Mystic Wilds <span style="font-size: 0.6em; color: #666;">Where the Mists Rule</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: #8a2be2;">
+                    <div class="card-header" style="color: #8a2be2;">Temple of Mists</div>
+                    <div class="card-body">
+                        The most sacred site in the kingdom. By ancient pact, the human King must send his firstborn
+                        daughter
+                        here to become a Bondmaker.
+                        Recently, the mists have turned dark, and something ancient is waking up.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #8a2be2;">
+                    <div class="card-header" style="color: #8a2be2;">Tol Kerdywel</div>
+                    <div class="card-body">
+                        The fallen city of the Dark Elves. A cursed ruin where the <strong>Dark Mists</strong>
+                        originate.
+                        It is said that the Dark Elves are massing here to retake their ancestral lands from the humans.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #8a2be2;">
+                    <div class="card-header" style="color: #8a2be2;">Key Entities</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li style="margin-bottom:5px;"><strong>The Mist Walkers:</strong> Rangers and druids who
+                                dare to
+                                travel the mists to keep the roads safe.</li>
+                            <li><strong>The Unseelie Court:</strong> Wicked fey who have been twisted by the dark magic
+                                of Tol
+                                Kerdywel.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="morencia-page" class="content-section">
+            <div style="margin-bottom: 20px; cursor: pointer; color: var(--accent-red);"
+                onclick="showSection('etharis')">
+                <i class="ph ph-arrow-left"></i> Back to Etharis
+            </div>
+
+            <h1 class="section-title">The City-State of Morencia</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid var(--accent-red); padding-left: 15px;">
+                A frantic web of canals, bridges, and coin. Protected by the <strong>Misty Reefs</strong>, Morencia has
+                remained
+                independent from the Empires for centuries.
+                It is the bank of Etharis, where the <strong>Augustine Trading Company</strong> holds more power than
+                kings.
+            </p>
+
+            <h2 style="color: var(--accent-gold); margin-top: 40px; border-bottom: 1px solid #333;">
+                The Powers That Be <span style="font-size: 0.6em; color: #666;">Coin & Daggers</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card">
+                    <div class="card-header">The Supreme Council</div>
+                    <div class="card-body">
+                        The city is officially ruled by <strong>Doge Lorenzo Flabenici</strong> and the Council.
+                        They maintain the "Illusion of Security"—the belief that Morencia is invincible—to keep the
+                        world's gold
+                        flowing into their vaults.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Augustine Trading Company</div>
+                    <div class="card-body">
+                        A massive mercantile force that effectively owns the Bankers Guild. They have a controlling
+                        interest in
+                        the city's politics and mercenaries.
+                        If you owe them money, you don't just lose your house; you disappear.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Guild Navigators</div>
+                    <div class="card-body">
+                        The only sailors capable of traversing the magical <strong>Misty Reefs</strong> without
+                        crashing.
+                        This monopoly makes them essential to the city's survival and incredibly wealthy.
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color: var(--accent-red); margin-top: 40px; border-bottom: 1px solid #333;">
+                The Dread of Moonless Night
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: #5a0000;">
+                    <div class="card-header" style="color: var(--accent-red);">The Canal Murders</div>
+                    <div class="card-body">
+                        Despite its wealth, Morencia is plagued by a serial killer (or cult) known as the "Dread."
+                        On moonless nights, bodies are found floating in the canals, ritually butchered. The Council
+                        suppresses
+                        this news to maintain the city's reputation.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #5a0000;">
+                    <div class="card-header" style="color: var(--accent-red);">The Ebon Syndicate</div>
+                    <div class="card-body">
+                        While they operate everywhere, the Syndicate's branch in Morencia is particularly vicious.
+                        They control the smuggling rings that bypass the customs of the Guild Navigators.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="inquisition-page" class="content-section">
+            <div style="margin-bottom: 20px; cursor: pointer; color: var(--accent-red);"
+                onclick="showSection('factions')">
+                <i class="ph ph-arrow-left"></i> Back to Factions
+            </div>
+
+            <h1 class="section-title">The Arcanist Inquisition</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid var(--accent-red); padding-left: 15px;">
+                "Magic is a curse. Fire is the cure." <br>
+                Founded in the Castinellan Provinces, the Inquisition is a military-religious order dedicated to the
+                <strong>Arch Seraph Empyreus</strong>.
+                They believe arcane magic caused the Gods' End and must be wiped from Etharis.
+            </p>
+
+            <h2 style="color: var(--accent-red); margin-top: 40px; border-bottom: 1px solid #333;">
+                The Chain of Command
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card">
+                    <div class="card-header">High Inquisitor</div>
+                    <div class="card-body">
+                        The supreme leader, answering only to the Arch Seraph Empyreus himself. Currently, this position
+                        is held
+                        by <strong>Inquisitor Valieda</strong> (the warlord of Castinella), merging church and state
+                        into a
+                        weapon of war.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">The Justicars</div>
+                    <div class="card-body">
+                        The elite knights of the order. Clad in golden plate and wielding flaming weapons, they are the
+                        executioners.
+                        They are often deployed to hunt high-level targets like Liches or Archmages.
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">The Finders</div>
+                    <div class="card-body">
+                        Spies and investigators who infiltrate cities to root out secret covens.
+                        They often use magical artifacts (sanctioned by the church) to detect the use of illegal magic.
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color: var(--accent-gold); margin-top: 40px; border-bottom: 1px solid #333;">
+                Doctrine & Strongholds
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: #d35400;">
+                    <div class="card-header" style="color: #d35400;">Cathedral of Embers</div>
+                    <div class="card-body">
+                        Located in the Shattered Peaks of Therpena. It is a massive fortress-temple built over an active
+                        volcanic vent.
+                        The "Eternal Flame" burns here, where captured mages are brought for "purification."
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #d35400;">
+                    <div class="card-header" style="color: #d35400;">The Rite of Branding</div>
+                    <div class="card-body">
+                        Mages who surrender are not always killed. Some are "Branded"—a painful ritual that severs their
+                        connection to the Weave, leaving them alive but powerless and scarred.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #d35400;">
+                    <div class="card-header" style="color: #d35400;">The Gray Library</div>
+                    <div class="card-body">
+                        A restricted archive within the Cathedral containing confiscated spellbooks and artifacts.
+                        Only High Inquisitors may enter, ostensibly to study the enemy, but rumors suggest they use the
+                        power
+                        for themselves.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="thaumaturge-page" class="content-section">
+            <div style="margin-bottom: 20px; cursor: pointer; color: var(--accent-red);"
+                onclick="showSection('factions')"><i class="ph ph-arrow-left"></i> Back to Factions</div>
+            <h1 class="section-title" style="color: #8a2be2;">The Thaumaturge</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid #8a2be2; padding-left: 15px;">
+                "We who shape magic, shape the world." <br>
+                A secret confederation of the most powerful Archmages in Etharis. They put aside political borders to
+                prevent
+                world-ending threats (like the Aether Kindred), often acting where governments cannot.
+            </p>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: #8a2be2;">
+                    <div class="card-header" style="color: #8a2be2;">The Hidden Council</div>
+                    <div class="card-body">Headquarters: A collectively maintained extraplanar space. Members are bound
+                        by a
+                        powerful <i>geas</i> that prevents them from betraying one another.</div>
+                </div>
+                <div class="lore-card" style="border-color: #8a2be2;">
+                    <div class="card-header" style="color: #8a2be2;">Key Members</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li><strong>Martorius:</strong> The reclusive Archmage of the Floating Castle (Bürach).</li>
+                            <li><strong>Mina Taliesin:</strong> The Lady of Masks (Ostoya).</li>
+                            <li><strong>Odis Tremain:</strong> Historian of Sarmar Academy (Charneault).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="hearthkeepers-page" class="content-section">
+            <div style="margin-bottom: 20px; cursor: pointer; color: var(--accent-red);"
+                onclick="showSection('factions')"><i class="ph ph-arrow-left"></i> Back to Factions</div>
+            <h1 class="section-title" style="color: var(--accent-gold);">The Hearthkeepers</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid var(--accent-gold); padding-left: 15px;">
+                The dominant religious order of the Bürach Empire. Since the Gods' End, they have become the power
+                behind the
+                throne, preaching the "protection" of Aurelia while suppressing the horrifying truth of the Great Beast.
+            </p>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: var(--accent-gold);">
+                    <div class="card-header" style="color: var(--accent-gold);">Pope Roland Murrich</div>
+                    <div class="card-body">The High Priest and true ruler of the Empire. He controls the boy-emperor
+                        Aratron II
+                        and sells "Indulgences" to the wealthy to forgive their sins.</div>
+                </div>
+                <div class="lore-card" style="border-color: var(--accent-gold);">
+                    <div class="card-header" style="color: var(--accent-gold);">The Great Lie</div>
+                    <div class="card-body">The Church actively suppresses knowledge of the <strong>Great Beast</strong>.
+                        They
+                        claim Aurelia is merely sleeping, not dead. To speak otherwise is heresy punishable by the pyre.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ebon-page" class="content-section">
+            <div style="margin-bottom: 20px; cursor: pointer; color: var(--accent-red);"
+                onclick="showSection('factions')"><i class="ph ph-arrow-left"></i> Back to Factions</div>
+            <h1 class="section-title" style="color: #666;">The Ebon Syndicate</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid #666; padding-left: 15px;">
+                "The Night is Our Kingdom." <br>
+                They are the reason you lock your doors. A massive criminal empire that controls the slums of every
+                major city.
+                If it's illegal, they sell it.
+            </p>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: #666;">
+                    <div class="card-header" style="color: #aaa;">Natalia Koscheii</div>
+                    <div class="card-body">The current "Greyman." The title of the Syndicate's leader is passed down,
+                        along with
+                        the Hawk Moth symbol. She is a master assassin who cannot be caught.</div>
+                </div>
+                <div class="lore-card" style="border-color: #666;">
+                    <div class="card-header" style="color: #aaa;">Operations</div>
+                    <div class="card-body">
+                        <ul class="mechanic-list" style="margin:0; padding:0;">
+                            <li><strong>The Shade:</strong> They rule the slums of Gräffendam.</li>
+                            <li><strong>Dreams Leave:</strong> They control the trade of this addictive drug.</li>
+                            <li><strong>Smuggling:</strong> They bypass the blockade of Ostoya to sell goods for high
+                                prices.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="crimson-page" class="content-section">
+            <div style="margin-bottom: 20px; cursor: pointer; color: var(--accent-red);"
+                onclick="showSection('factions')"><i class="ph ph-arrow-left"></i> Back to Factions</div>
+            <h1 class="section-title" style="color: #5a0000;">The Crimson Court</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid #5a0000; padding-left: 15px;">
+                The vampire aristocracy that rules Soma (southern Ostoya). They do not hide in the shadows; they rule
+                from high
+                castles, protected by the Dark Mist that blocks the sun.
+            </p>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: #5a0000;">
+                    <div class="card-header" style="color: var(--accent-red);">Grand Duke Drago Koshevek</div>
+                    <div class="card-body">The ruler of Soma. He resides in the fortress of Blackharbour in Nov Ostoya.
+                        He views
+                        his undead nature as the next step in evolution.</div>
+                </div>
+                <div class="lore-card" style="border-color: #5a0000;">
+                    <div class="card-header" style="color: var(--accent-red);">The Blood Tithe</div>
+                    <div class="card-body">Citizens of Soma pay taxes in gold and blood. In exchange, the Court protects
+                        them
+                        from the horrors of the wild (and from themselves).</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="freeswords-page" class="content-section">
+            <div style="margin-bottom: 20px; cursor: pointer; color: var(--accent-red);"
+                onclick="showSection('factions')"><i class="ph ph-arrow-left"></i> Back to Factions</div>
+            <h1 class="section-title" style="color: #ccc;">The Company of Free Swords</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid #ccc; padding-left: 15px;">
+                "Blood and Honor, Strength in Steel." <br>
+                The most elite mercenary company in Etharis. Founded by Darion Harkin, who deserted a tyrant king to
+                fight for
+                the soldier, not the ruler.
+            </p>
+            <div class="card-grid">
+                <div class="lore-card">
+                    <div class="card-header">The Iron Code</div>
+                    <div class="card-body">1. Stay loyal to the Company. <br>2. Be honest in dealings. <br>3. Take
+                        vengeance on
+                        those who betray you.</div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Headquarters: Voros</div>
+                    <div class="card-body">Located in the Charneault Kingdom, Voros is a fortress-city where the Free
+                        Swords
+                        train. It is said they can slay Demon Lords if the coin is right.</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="augustine-page" class="content-section">
+            <div style="margin-bottom: 20px; cursor: pointer; color: var(--accent-red);"
+                onclick="showSection('factions')"><i class="ph ph-arrow-left"></i> Back to Factions</div>
+            <h1 class="section-title" style="color: #2e8b57;">Augustine Trading Company</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid #2e8b57; padding-left: 15px;">
+                "Success in all ventures." <br>
+                Based in Morencia, this is the wealthiest organization in Etharis. They are ruthless merchant-lords who
+                act as a
+                bank for nations and an arms dealer for wars.
+            </p>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: #2e8b57;">
+                    <div class="card-header" style="color: #2e8b57;">Kolthys "Blazing Brain"</div>
+                    <div class="card-body">The current head of the company. Under his leadership, the Company has
+                        effectively
+                        bought a seat on the Morencian Supreme Council.</div>
+                </div>
+                <div class="lore-card" style="border-color: #2e8b57;">
+                    <div class="card-header" style="color: #2e8b57;">Project: Warbreed</div>
+                    <div class="card-body">The Company has moved beyond steel. They are now breeding
+                        monsters—Lycanthropic
+                        thralls and Eldritch mutants—to sell as living weapons.</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="history" class="content-section">
+            <h1 class="section-title">Timeline of Etharis</h1>
+            <p
+                style="color: var(--text-muted); border-left: 2px solid var(--accent-red); padding-left: 15px; margin-bottom: 40px;">
+                History in Etharis is not a record of triumph, but a eulogy. It is defined by three great tragedies: The
+                Purge
+                of the Elder Races, The Madness of the Emperors, and the Death of the Gods.
+            </p>
+
+            <div class="timeline">
+
+                <h3 style="color: #666; margin-left: -20px; margin-bottom: 20px;">I. The Ancient Era</h3>
+
+                <div class="timeline-event">
+                    <div class="year">The Primordial Sleep</div>
+                    <div class="event-desc">
+                        The legendary hero Kentigern slays the Great Prismatic Wyrm, <strong>Gormadraug</strong>. Its
+                        body forms
+                        the northern continent (Grarjord), and its slumber creates the threat of Coldfire.
+                    </div>
+                </div>
+                <div class="timeline-event">
+                    <div class="year">The Aetheric War</div>
+                    <div class="event-desc">
+                        The Gods wage war against the <strong>Aether Kindred</strong>—eldritch horrors from the void.
+                        The
+                        Kindred are sealed away, but the magical strain sows the seeds of future madness in the divine
+                        artifacts.
+                    </div>
+                </div>
+
+                <h3 style="color: var(--accent-red); margin-left: -20px; margin-top: 40px; margin-bottom: 20px;">II. The
+                    Era of
+                    Expansion</h3>
+
+                <div class="timeline-event">
+                    <div class="year">Arrival of Humanity</div>
+                    <div class="event-desc">
+                        Humans migrate to Etharis. Initially dismissed by Elves and Dwarves, they multiply rapidly and
+                        master
+                        magic and steel.
+                    </div>
+                </div>
+                <div class="timeline-event">
+                    <div class="year">The Great Purge</div>
+                    <div class="event-desc">
+                        Humanity declares total war on the Elder Races.
+                        <br>• <strong>Elves:</strong> Their kingdoms are burned; survivors flee to the deep forests of
+                        Charneault.
+                        <br>• <strong>Dwarves:</strong> Stehlenwald seals its gates. Grebenstein is destroyed.
+                        <br>• <strong>Dragonborn:</strong> The Ember Cairn is razed.
+                    </div>
+                </div>
+
+                <h3 style="color: var(--accent-gold); margin-left: -20px; margin-top: 40px; margin-bottom: 20px;">III.
+                    The
+                    Golden Age</h3>
+
+                <div class="timeline-event">
+                    <div class="year">Rise of Indorious</div>
+                    <div class="event-desc">
+                        Guided by the Four Divines, <strong>Emperor Indorious I</strong> unites the warring human tribes
+                        into
+                        the <strong>Bürach Empire</strong>. The "Golden Age" begins.
+                    </div>
+                </div>
+                <div class="timeline-event">
+                    <div class="year">The Edict of Eternal Blood</div>
+                    <div class="event-desc">
+                        To keep the Gods' blessing, the Hearthkeepers decree that the Imperial bloodline must remain
+                        pure.
+                        Centuries of inbreeding follow, slowly driving the emperors mad.
+                    </div>
+                </div>
+                <div class="timeline-event">
+                    <div class="year">Founding of the Inquisition</div>
+                    <div class="event-desc">
+                        In the south, <strong>Montego Valieda</strong> conquers the Castinellan Provinces in the name of
+                        the
+                        Arch Seraph Empyreus, declaring magic a heresy.
+                    </div>
+                </div>
+
+                <h3
+                    style="color: var(--accent-red-bright); margin-left: -20px; margin-top: 40px; margin-bottom: 20px; text-shadow: 0 0 5px red;">
+                    IV. The Gods' End</h3>
+
+                <div class="timeline-event">
+                    <div class="year" style="color: var(--text-light);">The Cataclysm</div>
+                    <div class="event-desc">
+                        Emperor Leopold I succumbs to madness. The connection between him and the Gods corrupts the
+                        Divines.
+                        <br>• <strong>War in Heaven:</strong> The gods slay one another.
+                        <br>• <strong>Aurelia's Fall:</strong> The Goddess of Protection sacrifices herself to shield
+                        the world,
+                        crashing into the earth.
+                    </div>
+                </div>
+
+                <h3 style="color: #ccc; margin-left: -20px; margin-top: 40px; margin-bottom: 20px;">V. The Age of
+                    Darkness
+                    (Present)</h3>
+
+                <div class="timeline-event">
+                    <div class="year">The Darkfall</div>
+                    <div class="event-desc">
+                        A massive earthquake strikes Ostoya. The sky turns permanently black. To save his people from
+                        the Bürach
+                        invasion, Captain Morgen Hund (now a vampire lord) turns the nobility into the undead.
+                    </div>
+                </div>
+                <div class="timeline-event">
+                    <div class="year">The Weeping Pox</div>
+                    <div class="event-desc">
+                        A magical plague released by the Filth Gazer decimates the city of Liesech. The physicians wear
+                        bird
+                        masks to hide the smell of death.
+                    </div>
+                </div>
+                <div class="timeline-event">
+                    <div class="year">Rise of the Great Beast</div>
+                    <div class="event-desc">
+                        A titanic aberration begins stalking the Bürach Empire. The Hearthkeepers claim the gods are
+                        merely
+                        "sleeping" to prevent mass panic.
+                    </div>
+                </div>
+                <div class="timeline-event">
+                    <div class="year">Coldfire Crisis</div>
+                    <div class="event-desc">
+                        In the north, blue fire begins consuming the Valikan lands, turning living flesh into ice. It is
+                        a sign
+                        that Gormadraug is waking up.
+                    </div>
+                </div>
+            </div>
+
+            <div class="lore-card" style="margin-top: 50px; border-color: #444;">
+                <div class="card-header">Lost to Time</div>
+                <div class="card-body">
+                    <ul class="mechanic-list" style="margin:0; padding:0;">
+                        <li style="margin-bottom: 10px;"><strong>The Liches' Sleep:</strong> The elven necromancers of
+                            Tol
+                            Kerdywel are not dead, merely sleeping in the mists.</li>
+                        <li style="margin-bottom: 10px;"><strong>The Dreamers:</strong> An ancient race that slept
+                            through the
+                            Aetheric War has recently awoken underground, with no memory of who they were.</li>
+                        <li><strong>The Downcast:</strong> Angels who survived the war were cast down to Etharis,
+                            becoming
+                            mortal wanderers stripped of their wings.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="religion" class="content-section">
+            <h1 class="section-title">The Lost Pantheon</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid var(--accent-gold); padding-left: 15px;">
+                The Gods are dead. In their wake, their lieutenants—the Arch Seraphs and Arch Daemons—vie for the souls
+                of
+                mortals.
+                Meanwhile, ancient powers that predate the gods stir in the dark.
+            </p>
+
+            <h2 style="color: var(--accent-gold); margin-top: 40px; border-bottom: 1px solid #333;">
+                The Arch Seraphs <span style="font-size: 0.6em; color: #666;">Guardians of Light</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card">
+                    <div class="card-header">Empyreus <span class="tag"
+                            style="border-color:#fff; color:#fff;">Valor</span>
+                    </div>
+                    <div class="card-body">
+                        The Unbroken. Patron of the Castinellan Inquisition. He demands strength, courage, and the
+                        purging of
+                        magic.
+                        <br><br><strong>Domain:</strong> War & Fire
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Zabriel <span class="tag"
+                            style="border-color:#fff; color:#fff;">Truth</span></div>
+                    <div class="card-body">
+                        The Lightbearer. She abandoned the heavens to walk among mortals. She seeks to expose lies and
+                        destroy
+                        the undead.
+                        <br><br><strong>Domain:</strong> Knowledge & Light
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Miklas <span class="tag"
+                            style="border-color:#fff; color:#fff;">Mercy</span></div>
+                    <div class="card-body">
+                        The Redeemer. She believes no soul is beyond saving. Her followers are often healers who walk
+                        the
+                        plague-ridden streets.
+                        <br><br><strong>Domain:</strong> Healing & Suffering
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Solyma <span class="tag"
+                            style="border-color:#fff; color:#fff;">Justice</span>
+                    </div>
+                    <div class="card-body">
+                        Lady Vengeance. She hunts those who escape the law. Her justice is blind, cold, and often
+                        bloody.
+                        <br><br><strong>Domain:</strong> Retribution & Law
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Morael <span class="tag"
+                            style="border-color:#fff; color:#fff;">Sacrifice</span>
+                    </div>
+                    <div class="card-body">
+                        The Martyr. He represents the strength to give up everything for others. Patron of those who
+                        fight
+                        hopeless battles.
+                        <br><br><strong>Domain:</strong> Sacrifice & Endurance
+                    </div>
+                </div>
+                <div class="lore-card">
+                    <div class="card-header">Aphaeleon <span class="tag"
+                            style="border-color:#fff; color:#fff;">Temperance</span></div>
+                    <div class="card-body">
+                        The Meditant. He preaches control over one's desires to find inner peace. Often worshipped by
+                        monks and
+                        scholars.
+                        <br><br><strong>Domain:</strong> Peace & Enlightenment
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color: var(--accent-red); margin-top: 50px; border-bottom: 1px solid #333;">
+                The Arch Daemons <span style="font-size: 0.6em; color: #666;">Lords of Sin</span>
+            </h2>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: var(--accent-red);">
+                    <div class="card-header" style="color: var(--accent-red);">Tormach <span class="tag">Wrath</span>
+                    </div>
+                    <div class="card-body">
+                        The Manslayer. He seeks only bloodshed. He does not care for strategy, only the slaughter of the
+                        battlefield.
+                        <br><br><strong>Rival:</strong> Empyreus
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: var(--accent-red);">
+                    <div class="card-header" style="color: var(--accent-red);">Venin <span class="tag">Deceit</span>
+                    </div>
+                    <div class="card-body">
+                        The Great Deceiver. Master of illusions and lies. She delights in twisting the truth until
+                        friends kill
+                        each other.
+                        <br><br><strong>Rival:</strong> Zabriel
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: var(--accent-red);">
+                    <div class="card-header" style="color: var(--accent-red);">Gorodyn <span class="tag">Avarice</span>
+                    </div>
+                    <div class="card-body">
+                        The King of Red Coins. He corrupts through wealth. He owns the souls of those who value gold
+                        over life.
+                        <br><br><strong>Rival:</strong> Solyma
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: var(--accent-red);">
+                    <div class="card-header" style="color: var(--accent-red);">Sitri <span class="tag">Hedonism</span>
+                    </div>
+                    <div class="card-body">
+                        The Tempter. He promises pleasure, lust, and excess, slowly draining the life from his victims.
+                        <br><br><strong>Rival:</strong> Aphaeleon
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: var(--accent-red);">
+                    <div class="card-header" style="color: var(--accent-red);">Malikir <span class="tag">Pride</span>
+                    </div>
+                    <div class="card-body">
+                        The Velvet Queen. She is the strongest of the Arch Daemons. She corrupts heroes by feeding their
+                        ego.
+                        <br><br><strong>Rival:</strong> Morael
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: var(--accent-red);">
+                    <div class="card-header" style="color: var(--accent-red);">Beleth <span class="tag">Fear</span>
+                    </div>
+                    <div class="card-body">
+                        The Laughing Man. He feeds on terror. He is the patron of tyrants who rule through intimidation.
+                        <br><br><strong>Rival:</strong> Miklas
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color: #8a2be2; margin-top: 50px; border-bottom: 1px solid #333;">
+                Cosmic Threats <span style="font-size: 0.6em; color: #666;">Forces of the Void</span>
+            </h2>
+
+            <h3 style="color: #607d8b; margin-top:20px;">The Primordials</h3>
+            <p style="font-size: 0.9em; color: #aaa;">Elemental titans that ruled before the gods.</p>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: #607d8b;">
+                    <div class="card-header" style="color: #607d8b;">Gormadraug</div>
+                    <div class="card-body">The Great Prismatic Wyrm. Slumbering beneath the north. If he wakes, the
+                        world ends.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #607d8b;">
+                    <div class="card-header" style="color: #607d8b;">Lady Morwen</div>
+                    <div class="card-body">Queen of Storms. Ruler of the endless tempests in the Sea of Turmoil.</div>
+                </div>
+                <div class="lore-card" style="border-color: #607d8b;">
+                    <div class="card-header" style="color: #607d8b;">Alondo</div>
+                    <div class="card-body">Lord of the Deep. A leviathan who claims all who die at sea.</div>
+                </div>
+                <div class="lore-card" style="border-color: #607d8b;">
+                    <div class="card-header" style="color: #607d8b;">Citrolach</div>
+                    <div class="card-body">The Living Mountain. The earth itself that shakes and devours cities.</div>
+                </div>
+                <div class="lore-card" style="border-color: #607d8b;">
+                    <div class="card-header" style="color: #607d8b;">Ilhara</div>
+                    <div class="card-body">The Queen of Air and Whispers. She knows all secrets spoken on the wind.
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="color: #8a2be2; margin-top:40px;">The Aether Kindred</h3>
+            <p style="font-size: 0.9em; color: #aaa;">Eldritch horrors from beyond the stars.</p>
+            <div class="card-grid">
+                <div class="lore-card" style="border-color: #8a2be2;">
+                    <div class="card-header" style="color: #8a2be2;">The Locus</div>
+                    <div class="card-body">
+                        A sentient tear in reality. It warps the laws of physics and magic around it, driving mages
+                        insane.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #8a2be2;">
+                    <div class="card-header" style="color: #8a2be2;">The Beast</div>
+                    <div class="card-body">
+                        The Hunter of Gods. It stalks the Bürach Empire, corrupting nature into twisted aberrations.
+                    </div>
+                </div>
+                <div class="lore-card" style="border-color: #8a2be2;">
+                    <div class="card-header" style="color: #8a2be2;">The Filth Gazer</div>
+                    <div class="card-body">
+                        The Source of Plague. A massive floating eye that drips disease. Responsible for the Weeping Pox
+                        in
+                        Liesech.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="renowned-page" class="content-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="cursor: pointer; color: var(--accent-red);" onclick="showSection('etharis')">
+                    <i class="ph ph-arrow-left"></i> Back to Etharis
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="exportFigures()"
+                        style="background: #333; color: var(--text-light); border: 1px solid #555; padding: 8px 15px; font-family: var(--font-header); cursor: pointer; text-transform: uppercase;">
+                        <i class="ph ph-download-simple"></i> Export JSON
+                    </button>
+
+                    <button onclick="toggleFigureForm()"
+                        style="background: var(--accent-red); color: #fff; border: 1px solid #000; padding: 8px 15px; font-family: var(--font-header); cursor: pointer; text-transform: uppercase;">
+                        <i class="ph ph-plus"></i> Record Figure
+                    </button>
+                </div>
+            </div>
+
+            <h1 class="section-title">Figures of Etharis</h1>
+            <p style="color: var(--text-muted); border-left: 2px solid var(--accent-red); padding-left: 15px;">
+                "With danger everywhere, Etharis teems with heroes and villains".
+            </p>
+
+            <div id="figure-form-container"
+                style="display: none; background: #1a1a1a; padding: 20px; border: 2px solid var(--accent-red); margin-bottom: 30px; box-shadow: 0 0 15px #000;">
+                <h3 style="color: var(--accent-gold); margin-top: 0; font-family: var(--font-header);">Record a New
+                    Legend</h3>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="new-name" placeholder="Name"
+                        style="background: #333; color: #fff; border: 1px solid #555; padding: 8px;">
+                    <input type="text" id="new-race" placeholder="Race"
+                        style="background: #333; color: #fff; border: 1px solid #555; padding: 8px;">
+                    <input type="text" id="new-region" placeholder="Region"
+                        style="background: #333; color: #fff; border: 1px solid #555; padding: 8px;">
+                </div>
+
+                <textarea id="new-desc" rows="4" placeholder="Their story..."
+                    style="width: 100%; background: #333; color: #fff; border: 1px solid #555; padding: 8px; margin-bottom: 10px; font-family: var(--font-body);"></textarea>
+
+                <div style="text-align: right;">
+                    <button onclick="toggleFigureForm()"
+                        style="background: transparent; color: #888; border: none; padding: 8px 15px; cursor: pointer;">Cancel</button>
+                    <button onclick="saveNewFigure()"
+                        style="background: var(--accent-gold); color: #000; border: none; padding: 8px 15px; font-weight: bold; cursor: pointer;">Save
+                        to Archives</button>
+                </div>
+
+            </div>
+
+            <div class="card-grid">
+                <div id="custom-figures-container" style="display: contents;"></div>
+                <div class="lore-card" onclick="openCharModal('liu')">
+                    <div class="card-header">Liu Quizan</div>
+                    <div class="card-body">
+                        <strong>Race:</strong> Dragonborn<br>
+                        <strong>Region:</strong> Bürach Empire
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="openCharModal('gerbo')">
+                    <div class="card-header">Gerbo Amakiir</div>
+                    <div class="card-body">
+                        <strong>Race:</strong> Gnome<br>
+                        <strong>Region:</strong> Ostoyan Empire
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="openCharModal('kainen')">
+                    <div class="card-header">Kainen Alabaster</div>
+                    <div class="card-body">
+                        <strong>Race:</strong> Half-Orc<br>
+                        <strong>Region:</strong> Charneault
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="openCharModal('brassboy')">
+                    <div class="card-header">The Brass Boy</div>
+                    <div class="card-body">
+                        <strong>Race:</strong> Construct<br>
+                        <strong>Region:</strong> Castinella
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="openCharModal('sasha')">
+                    <div class="card-header">Sasha Seraphsbane</div>
+                    <div class="card-body">
+                        <strong>Race:</strong> Human<br>
+                        <strong>Region:</strong> Castinella
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="openCharModal('negra')">
+                    <div class="card-header">Negra Rosa</div>
+                    <div class="card-body">
+                        <strong>Race:</strong> Human (Undead)<br>
+                        <strong>Region:</strong> Ostoyan Empire
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="openCharModal('kaine')">
+                    <div class="card-header">Kaine Gundrig</div>
+                    <div class="card-body">
+                        <strong>Race:</strong> Human<br>
+                        <strong>Region:</strong> Castinella
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="openCharModal('alister')">
+                    <div class="card-header">Alister "Mad Jester" Gaunt</div>
+                    <div class="card-body">
+                        <strong>Race:</strong> Human<br>
+                        <strong>Region:</strong> Castinella
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="openCharModal('garren')">
+                    <div class="card-header">Garren Ulfhart</div>
+                    <div class="card-body">
+                        <strong>Race:</strong> Human<br>
+                        <strong>Region:</strong> Valikan Clans
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="openCharModal('grimm')">
+                    <div class="card-header">Grimm Harvest</div>
+                    <div class="card-body">
+                        <strong>Race:</strong> Halfling<br>
+                        <strong>Region:</strong> Charneault
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="openCharModal('kizzy')">
+                    <div class="card-header">Kizmet "Kizzy" Raine</div>
+                    <div class="card-body">
+                        <strong>Race:</strong> Human<br>
+                        <strong>Region:</strong> Charneault
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="openCharModal('strauss')">
+                    <div class="card-header">Dr. Amielia Strauss</div>
+                    <div class="card-body">
+                        <strong>Race:</strong> Human<br>
+                        <strong>Region:</strong> Castinella
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="openCharModal('vesryn')">
+                    <div class="card-header">High Justicar Vesryn</div>
+                    <div class="card-body">
+                        <strong>Race:</strong> Half-Elf<br>
+                        <strong>Region:</strong> Charneault
+                    </div>
+                </div>
+
+                <div class="lore-card" onclick="openCharModal('isaac')">
+                    <div class="card-header">Isaac Adstrum</div>
+                    <div class="card-body">
+                        <strong>Race:</strong> Human<br>
+                        <strong>Region:</strong> Charneault
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div id="charModal" class="modal-overlay" onclick="closeCharModal(event)">
+            <div class="modal-window">
+                <div class="modal-close-btn" onclick="closeCharModal(event)">×</div>
+                <div id="modalTitle" class="modal-title">Name</div>
+                <div id="modalSubtitle" class="modal-subtitle">Race | Region</div>
+                <div id="modalText" class="modal-text">Description goes here...</div>
+            </div>
+        </div>
+
+        <script>
+            const charData = {
+                liu: {
+                    name: "Liu Quizan",
+                    race: "Dragonborn",
+                    region: "Bürach Empire",
+                    text: `They say fire runs in the veins of Liu Quizan—not because he is a dragonborn, but because of the righteous flame of justice in his heart. Liu was born in a remote village in the northern Bürach Empire. Incensed by the abuses of the cruel noble who ruled the village, Liu invoked ancient law and challenged his lord into a duel. Luck smiled on Liu, and his sword pierced the nobleman’s heart.\n\nLiu’s fellow villagers hailed him as a hero, but he knew he needed to atone for the killing. He joined a monastery to cleanse his conscience. Unable to forget, however, he wasted his days drinking enormous quantities of alcohol.\n\nLiu left the monastery to travel alongside adventurers, cleansing darkness wherever he went. His legend grew. It was said he could slay vampires bare-handed, that he could outfight an entire army and outdrink it as well. Yet, one by one, his comrades died or fell to darkness, and Liu was left alone. That is when his old demons found him again.\n\nLiu, as they say, drowned in a bottle. He became a derelict, and waited to die. But his legend was not over yet, and a humble gnome named Gerbo Amakiir would begin the next chapter.`
+                },
+                gerbo: {
+                    name: "Gerbo Amakiir",
+                    race: "Gnome",
+                    region: "Ostoyan Empire",
+                    text: `Countless unsung heroes dwell in the cities working for their community every day. A shining example is the gnome bard Gerbo Amakiir. With a sharp tongue, brilliant mind, and an aptitude for the lute, young Gerbo explored the world around him and his heart broke for it. Using the wealth he amassed through his talents, he decided the best way to soothe the pain of the helpless was to start an orphanage.\n\nHe thus created a huge family, where every child in need was his own. But Gerbo’s success drew unfortunate attention. A vampire ruled Gerbo’s city, and that lord approached Gerbo with an ultimatum: Gerbo could only continue as a prominent figure in the city if he became a vampire as well. Gerbo could not accept or give up his orphanage, so the vampire offered an alternative: Gerbo could keep his orphanage and his mortality so long as he provided the vampire rulers a tribute of three victims a month.\n\nSo Gerbo became a murderer, seeing no choice but to prey on the vulnerable. And this went on for far too long. Yet one night, as he searched for victims and prepared to kill a drunken dragonborn, he recognized the derelict as none other than the hero Liu Quizan. That night, he abandoned his deal with the vampire and nursed Liu back to health. In Liu, he realized he could have a powerful ally.`
+                },
+                kainen: {
+                    name: "Kainen Alabaster",
+                    race: "Half-Orc",
+                    region: "Charneault Kingdom",
+                    text: `Among the peace-loving lycanthropes of the Raven’s Wolves tribe, the wisest is Kainen Alabaster, known as the Witch Doctor. Kainen was born in a small tribe of half-orc outcasts who roamed the borders of the great human and elf settlements. However, in a disastrous hunt, Kainen was bitten by a werewolf. The half-orc’s spiritual strength held back the disease at first, but the urges awakened by the full moon were uncontrollable.\n\nKainen awoke bathed in the blood of his own tribe. For a time, he lost his mind, giving in to the wolf. His cries of sorrow and rage filled the night, until the Raven’s Wolves found him and taught him to control his dark side.\n\nKainen studied herbalism, and soon became a master. He has created potions to ease the pain of transformation, calming the wolf inside every lycanthrope. His greatest achievement is the discovery of a rare potion that he calls the Lichsbane, which can dissolve the magic that animates even the strongest undead. Living a personal oath of non-violence, Kainen Alabaster roams the woodlands seeking the remedy that would free his kin from the curse of lycanthropy once and for all.`
+                },
+                brassboy: {
+                    name: "The Brass Boy",
+                    race: "Construct",
+                    region: "Castinella",
+                    text: `Etharis is full of relics of the past, some wonderful and some the products of depraved minds. None is more bizarre than the artifact called The Brass Boy. Though it looks human, beneath its paper-thin skin and painted features is a skeleton of brass tubes and gears, and veins of hissing steam. This construct is several centuries old, and its mechanical mind was built with one purpose: to learn everything about war.\n\nThe Brass Boy was built long ago as one of many, to advise leaders on governance and promote happiness. But the Brass Boy saw its creator murdered by the king who commissioned it, and the experience warped the construct’s mind. If life was so fragile and living things so evil, the Brass Boy chose to spread death.\n\nEventually, the Brass Boy found a new leader to serve, the warlord Sasha Seraphsbane. It uses its knowledge to help her in her war against the Castinellan Church. However, the Brass Boy waits for its moment to betray her. Its grand plan is to turn one master against another until it has created a war that will consume all life across Etharis.`
+                },
+                sasha: {
+                    name: "Sasha Seraphsbane",
+                    race: "Human",
+                    region: "Castinella Provinces",
+                    text: `Outlaws in Castinella measure their status by the size of the bounties. By this standard, the greatest outlaw of all must be the notorious warlock Sasha Seraphsbane. Sasha was born Esperanza Moscoco. The daughter of a wealthy Corovan house, her elegance and charm drew the attention of a powerful inquisitor. Her parents arranged a marriage quickly, in spite of Esperanza’s wishes.\n\nAt first, Esperanza endured her political marriage, until she laid eyes on the most beautiful woman she had ever seen. The two became friends, and eventually lovers. Esperanza was torn; this new and mysterious woman was the person she truly wanted to spend her life with.\n\nEventually, as often happens, rumors began to spread. Rumors of Esperanza’s affair reached the ears of her husband, and in his rage he summoned the Inquisition. Esperanza’s love was arrested, tried, and burned. In a moment of desperation, Esperanza called upon the dark forces. An Arch Fiend answered her call. Esperanza took the name of Sasha Seraphsbane, and with her newfound power she began to gather an army.`
+                },
+                negra: {
+                    name: "Negra Rosa",
+                    race: "Human (Undead Tainted)",
+                    region: "Ostoyan Empire",
+                    text: `When the undead army of a powerful lich burned a path through southern Ostoya, individual settlements were powerless against it. The priests of one town locked themselves in their temple and prayed. They emerged with a plan: they must sacrifice a young girl to the lich in exchange for their town’s safety. Negra Rosa, the daughter of a prominent family, was chosen.\n\nDutifully, she sought out the lich. Instead of killing her, the lich told her she would be his mortal herald. To spare her town, Negra agreed. The lich imbued her with a portion of his foul soul. To complete the change, the lich told Negra she must taint her soul with a murder by the end of that day.\n\nBut Negra could not do it. To punish her hesitation, the lich struck down Negra’s family. When they rose as ghouls, the town had no choice but to burn them. Negra Rosa learned her lesson, and she has never again hesitated to kill. Yet she still hopes that she might be freed. In secret, she searches for the herbalist Kainen Alabaster.`
+                },
+                kaine: {
+                    name: "Kaine Gundrig",
+                    race: "Human",
+                    region: "Castinella Provinces",
+                    text: `A hero or a villain? A brute or a charismatic leader? No one can be sure, but everyone in Castinella knows the deeds and fervor of Kaine Gundrig. Once Kaine served the Arcanist Inquisition, but even they balked at his cruelty and cast him out. Kaine saw this as a sign that Empyreus was pushing him to start his own, purer Inquisition—one that would punish all sinners.\n\nRarely seen without his full plate armour or flaming longsword, Kaine has nonetheless learned that his words can be equally powerful. Preaching a twisted gospel, he has lured the downtrodden and destitute to the ranks of his army. They believe he is the avatar of Empyreus.\n\nThe church of the Castinella Provinces condemns Kaine as a heretic. Desperate, they sent a hired killer—Alister “the Mad Jester” Gaunt—to get rid of Kaine. But Kaine used his words to play on Gaunt’s fractured psyche and escaped. Now Kaine pursues revenge against the Mad Jester, allying himself with the paladin Garren Ulfhart.`
+                },
+                alister: {
+                    name: "Alister 'The Mad Jester' Gaunt",
+                    race: "Human",
+                    region: "The Castinella Provinces",
+                    text: `Calculating, deadly, efficient, and utterly mad, Alister Gaunt is the most feared killer for hire in the Castinellan Provinces. His nickname, “the Mad Jester,” is no joke. Gaunt honed his skills as a member of the Arcanist Inquisition, but the violence he excelled at there eventually snapped his mind in two.\n\nOne day, he turned all his skills on his companions and fled, leaving a theatre of carnage behind. Only one of his companions, the paladin Garren Ulfhart, survived to swear vengeance.\n\nAlister’s twisted mind contains two versions of reality. In one, there is only death, chaos, and pain; in the other, there is only peace and kindness. Anyone who wishes to hire him must hope to find him in his pacifistic frame of mind, or else risk being his next victim. The only person to successfully exploit this schism is the one target he failed to kill: the silver-tongued demagogue Kaine Grundig. Gaunt has never forgiven himself for this failure.`
+                },
+                garren: {
+                    name: "Garren Ulfhart",
+                    race: "Human",
+                    region: "Valikan Clans",
+                    text: `The frozen lands of Valika afford no second chances—except perhaps in the case of the Undying Garren Ulfhart. Garren had a peaceful life until a distant clan’s raiding party found Garren’s village. They forced the villagers to kill each other for their amusement. In an especially cruel stroke, Garren and his beloved were pitted against each other. Refusing to spill her blood, he turned his sword on himself.\n\nBut as his consciousness faded, he saw her fall beside him, run through by one of the raiders. Garren awoke amid the burning remains of his village, alone. He stayed there nine days, searching for a reason he should have survived. At last, he found it. He headed south to Castinella where warriors serve a greater cause.\n\nGarren is now a member of the Cleansing Flame, an arm of the Knights Transcendent. He has burned more cultists and banished more fiends than he can remember. His only failure, in his own eyes, is that the traitor known as the Mad Jester still lives. To put an end to the madman, he has allied himself with the demagogic paladin Kaine.`
+                },
+                grimm: {
+                    name: "Grimm Harvest",
+                    race: "Halfling",
+                    region: "Charneault Kingdom",
+                    text: `Every child on the outskirts of the Charneault Kingdom has heard the gruesome tale of the Flesh Carver. The Flesh Carver was once a young halfling druid named Grimm Harvest. Growing up with her mother in the forest, every flower was her friend. One day, woodcutters entered the forest. Grimm tried to show them the oldest trees, but they chased her off. They followed her home, and believing her mother was a witch, burned the hut with both inside.\n\nGrimm escaped; her mother perished. Young Grimm’s heart shattered, and she begged the forest for vengeance. The forest sent forth a terrible spirit to make a bargain: Grimm would be the forest’s new protector. Grimm accepted the forest’s power and its bitterness, and became the Flesh Carver. The woodcutters were her first victims. Now, strange trees appear in the forest with human limbs, and it is said that if one listens to their trunks, one hears a heartbeat and distant screams.`
+                },
+                kizzy: {
+                    name: "Kizmet 'Kizzy' Raine",
+                    race: "Human",
+                    region: "Charneault Kingdom",
+                    text: `Of all the acrobats and tricksters on the trade routes, none shined brighter than Kizmet ‘’Kizzy’’ Raine. She was gifted with the power of sorcery and an aptitude for divination. She soon learned this gift had a dark side. Her magic showed her the darkness in the hearts of her troupe. She resolved to leave, but their leader threatened her with a terrible curse.\n\nShe woke one day to realize she had trouble picturing her parents’ faces. Over time, she gradually forgot her family, her friends, her first love... everyone faded to oblivion. Her fate suddenly changed, though, when she met the traveling doctor Amelia Strauss and her mechanical golem M.O.T.T. The two formed a fast friendship, and the doctor set to work finding a cure. To this day, they roam the lands together, offering their services as doctors and herbalists.`
+                },
+                strauss: {
+                    name: "Dr. Amielia Strauss",
+                    race: "Human",
+                    region: "Castinella Provinces",
+                    text: `Well versed in alchemy, wizardry and science, Doctor Strauss’s true potential is limited only by her chaotic and curious nature. Her creations blend physical science and magic so expertly that neither the greatest wizards nor the greatest artificers can fully comprehend them. Since the Inquisition cannot determine where Strauss’ science ends and her (alleged) magic begins, they have no divine mandate to hunt down the scientist.\n\nIn her wanderings, Strauss met the sorceress Kizmet Raine and realized she was cursed. To save Kizmet, they braved the dark forest of the Flesh Carver in search of a cure. The monster spared their lives and allowed them to leave with their cure. Strauss and Raine still travel the land with M.O.T.T.`
+                },
+                vesryn: {
+                    name: "High Justicar Vesryn",
+                    race: "Half-Elf",
+                    region: "Charneault Kingdom",
+                    text: `The Order of Justiciars ensures that sentences are only carried out on the guilty. Before becoming the founder of this order, Vesryn was a renowned half-elf knight. Tragedy struck when he was first to find his lord murdered. Accused of the lord’s death, Vesryn was stripped of his title. The court allowed Vesryn one week to prove his innocence.\n\nVesryn prayed. A spirit of justice granted him its powers to sense the injustice in others’ hearts. In one week, he delivered proof that he could not have been the true killer. The court offered to restore Vesryn’s old position, but Vesryn decided to answer a higher call. He founded the Justiciars. He never stopped searching for his lord’s true killer. When the lieutenant of his order showed him evidence that the murderer was the werewolf Isaac Adstrum, Vesryn prepared himself for battle, unaware of his lieutenant's betrayal.`
+                },
+                isaac: {
+                    name: "Isaac Adstrum",
+                    race: "Human",
+                    region: "The Charneault Kingdom",
+                    text: `The Raven’s Wolves are a nomadic tribe of lycanthropes who try to tame their bloodlust. None better embodies their ideals than the werewolf warlock Isaac Adstrum. Adstrum has always favored peace, and finds no pleasure in the bloody passions of lycanthropy. When his violent urges are too strong, he retreats to the deep forest and meditates with the aid of his moonstone sword, Shadowfell.\n\nHowever, when violence is necessary, Isaac Adstrum acts decisively. The sword Shadowfell is enchanted—whenever a person presents a mortal threat to the tribe, their name appears on the blade. The shamans say that this sword is the voice of the forest spirit itself. Yet the latest name to appear was that of Charneault’s High Justicar Vesryn—a well-known and righteous man. Isaac hesitated, but the shamans assured him Shadowfell could not lie. So Adstrum has set out toward the most dangerous fight of his life.`
+                }
+            };
+
+            function openCharModal(charKey) {
+                console.log("Opening modal for:", charKey); // Debugging check
+                const data = charData[charKey];
+                if (!data) {
+                    console.error("No data found for key:", charKey);
+                    return;
+                }
+
+                document.getElementById('modalTitle').innerText = data.name;
+                document.getElementById('modalSubtitle').innerText = data.race + " | " + data.region;
+                document.getElementById('modalText').innerText = data.text;
+
+                document.getElementById('charModal').classList.add('modal-active');
+            }
+
+            function closeCharModal(event) {
+                if (event.target.classList.contains('modal-overlay') ||
+                    event.target.classList.contains('modal-close-btn')) {
+                    document.getElementById('charModal').classList.remove('modal-active');
+                }
+            }
+        </script>
+
+        <div id="charModal" class="modal-overlay" onclick="closeCharModal(event)">
+            <div class="modal-window">
+                <div class="modal-close-btn" onclick="closeCharModal(event)">×</div>
+                <div id="modalTitle" class="modal-title">Name</div>
+                <div id="modalSubtitle" class="modal-subtitle">Race | Region</div>
+                <div id="modalText" class="modal-text">Description goes here...</div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        /* --- REPLACE YOUR EXISTING showSection FUNCTION WITH THIS BLOCK --- */
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
+
+        function showSection(sectionId) {
+            // 1. Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(sec => sec.classList.remove('active'));
+
+            // 2. Show selected section
+            const activeSection = document.getElementById(sectionId);
+            if (activeSection) {
+                activeSection.classList.add('active');
+                // Scroll to top on mobile when changing sections
+                document.getElementById('main-content').scrollTop = 0;
+            }
+
+            // 3. Update sidebar highlighting
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('onclick').includes(sectionId)) {
+                    item.classList.add('active');
+                }
+            });
+
+            // 4. AUTO-CLOSE MENU (New for Mobile)
+            // If on mobile (screen < 900px), close sidebar after clicking
+            if (window.innerWidth <= 900) {
+                document.getElementById('sidebar').classList.remove('mobile-open');
+                document.getElementById('mobile-overlay').classList.remove('active');
+            }
+        }
+
+    </script>
+
+    <script>
+        // --- FIGURES MANAGER ---
+
+        // Load figures on startup
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCustomFigures();
+        });
+
+        function toggleFigureForm() {
+            const form = document.getElementById('figure-form-container');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function saveNewFigure() {
+            const name = document.getElementById('new-name').value;
+            const race = document.getElementById('new-race').value;
+            const region = document.getElementById('new-region').value;
+            const desc = document.getElementById('new-desc').value;
+
+            if (!name || !desc) {
+                alert("Name and Description are required.");
+                return;
+            }
+
+            const newFigure = {
+                id: Date.now(), // Unique ID
+                name,
+                race,
+                region,
+                desc
+            };
+
+            // Save to LocalStorage
+            let figures = JSON.parse(localStorage.getItem('grim_hollow_figures') || '[]');
+            figures.unshift(newFigure); // Add to top
+            localStorage.setItem('grim_hollow_figures', JSON.stringify(figures));
+
+            // Refresh Display
+            loadCustomFigures();
+            toggleFigureForm();
+
+            // Clear Inputs
+            document.getElementById('new-name').value = '';
+            document.getElementById('new-race').value = '';
+            document.getElementById('new-region').value = '';
+            document.getElementById('new-desc').value = '';
+        }
+
+        function loadCustomFigures() {
+            const container = document.getElementById('custom-figures-container');
+            const figures = JSON.parse(localStorage.getItem('grim_hollow_figures') || '[]');
+
+            container.innerHTML = ''; // Clear current list
+
+            figures.forEach(fig => {
+                // Determine border color based on region (Simple hash or default)
+                let color = '#777';
+                if (fig.region.includes('Bürach')) color = '#d4af37';
+                else if (fig.region.includes('Ostoya')) color = '#5a0000';
+                else if (fig.region.includes('Valika')) color = '#607d8b';
+                else if (fig.region.includes('Castinella')) color = '#d35400';
+                else if (fig.region.includes('Charneault')) color = '#2e8b57';
+
+                // Generate CARD HTML (Matching the static ones)
+                const cardHTML = `
+                    <div class="lore-card" style="border-color: ${color}; position: relative;" onclick="openCustomModal(${fig.id})">
+                        <div class="card-header" style="color: ${color};">
+                            ${fig.name}
+                            <button onclick="deleteFigure(event, ${fig.id})" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: #444; cursor: pointer; font-size: 1rem; z-index: 10;" title="Delete Permanently">
+                                <i class="ph ph-trash"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <strong>Race:</strong> ${fig.race}<br>
+                            <strong>Region:</strong> ${fig.region}
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+
+        function exportFigures() {
+            // 1. Get the data from LocalStorage
+            const jsonString = localStorage.getItem('grim_hollow_figures');
+
+            // 2. Check if there is data
+            if (!jsonString || jsonString === '[]') {
+                alert("No custom figures found to export!");
+                return;
+            }
+
+            // 3. Create a blob (a virtual file)
+            const blob = new Blob([jsonString], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+
+            // 4. Create a temporary link to trigger the download
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `grim_hollow_figures_patch.json`; // filenames like: grim_hollow_figures_2023-10-27.json
+            document.body.appendChild(a);
+            a.click();
+
+            // 5. Cleanup
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // pens the modal for custom figures
+        function openCustomModal(id) {
+            const figures = JSON.parse(localStorage.getItem('grim_hollow_figures') || '[]');
+            const data = figures.find(f => f.id === id);
+
+            if (!data) return;
+
+            // Fill the existing modal structure
+            document.getElementById('modalTitle').innerText = data.name;
+            document.getElementById('modalSubtitle').innerText = data.race + " | " + data.region;
+            document.getElementById('modalText').innerText = data.desc; // Using 'desc' from saved data
+
+            // Show the modal
+            document.getElementById('charModal').classList.add('modal-active');
+        }
+
+        function deleteFigure(event, id) {
+            // Prevent the card click (modal open) when clicking delete
+            event.stopPropagation();
+
+            if (confirm("Delete this legend permanently?")) {
+                let figures = JSON.parse(localStorage.getItem('grim_hollow_figures') || '[]');
+                figures = figures.filter(f => f.id !== id);
+                localStorage.setItem('grim_hollow_figures', JSON.stringify(figures));
+                loadCustomFigures();
+            }
+        }
+    </script>
+
+</body>
+
+</html>
