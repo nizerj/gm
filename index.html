@@ -1145,11 +1145,11 @@
                     </div>
                     <textarea id="smartFillText" class="inp"
                         style="height:250px; font-family:monospace; font-size:0.8rem;" placeholder="Paste text here...
-Example:
-WHIPSKEIN HORROR
-Medium aberration, any alignment
-Armor Class 14 (studded leather)
-..."></textarea>
+                Example:
+                WHIPSKEIN HORROR
+                Medium aberration, any alignment
+                Armor Class 14 (studded leather)
+                ..."></textarea>
                     <button class="btn w-full" style="margin-top:10px;" onclick="Library.smartParse()">Process
                         Text</button>
                 </div>
@@ -1277,8 +1277,11 @@ Armor Class 14 (studded leather)
 
             </div>
             <div class="dialog-footer">
-                <button class="btn btn-outline"
-                    onclick="document.getElementById('editorModal').classList.remove('open')">Cancel</button>
+                <button id="btnImportStatblock" class="btn btn-outline" style="margin-right:auto;" onclick="document.getElementById('importStatblockFile').click()"><i class="ph ph-upload"></i> Import</button>
+                <input type="file" id="importStatblockFile" class="hidden" accept=".json" onchange="Library.importStatblock(this)">
+                <button id="btnExportStatblock" class="btn btn-outline" style="margin-right:auto;" onclick="Library.exportStatblock()"><i class="ph ph-download"></i> Export</button>
+
+                <button class="btn btn-outline" onclick="document.getElementById('editorModal').classList.remove('open')">Cancel</button>
                 <button class="btn" onclick="Library.saveEntity()">Save Entity</button>
             </div>
         </div>
@@ -2011,7 +2014,95 @@ Armor Class 14 (studded leather)
                 } else {
                     el('smartFillText').value = "";
                 }
+                // Toggle Import/Export buttons
+                el('btnImportStatblock').style.display = index !== null ? 'none' : 'inline-flex';
+                el('btnExportStatblock').style.display = index !== null ? 'inline-flex' : 'none';
+                window._tempImportedImg = null; // Clear any pending imported image
             },
+
+            exportStatblock: async () => {
+                const type = document.getElementById('edType').value;
+                const index = parseInt(document.getElementById('edIndex').value);
+                if (index < 0) return;
+                
+                const entity = JSON.parse(JSON.stringify(State.library[type][index]));
+                
+                // If the image is stored in the DB, fetch the raw base64 data to include in the portable JSON
+                if (entity.img && entity.img.startsWith('DB:')) {
+                    entity.img = await DB.get(entity.img.split(':')[1]);
+                }
+                
+                // Clean up local tracking IDs
+                delete entity.id;
+                delete entity.folderId;
+
+                const blob = new Blob([JSON.stringify(entity, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${entity.name ? entity.name.replace(/\s+/g, '_').toLowerCase() : 'entity'}_statblock.json`;
+                document.body.appendChild(a); 
+                a.click(); 
+                document.body.removeChild(a);
+                Utils.toast("Statblock Exported!");
+            },
+
+            importStatblock: (fileInput) => {
+                const file = fileInput.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const ent = JSON.parse(e.target.result);
+                        const el = (id) => document.getElementById(id);
+                        const setVal = (id, val) => el(id).value = (val !== undefined && val !== null) ? val : "";
+
+                        setVal('edName', ent.name);
+                        setVal('edCR', ent.cr || "0"); 
+                        setVal('edRace', ent.type);
+                        setVal('edAC', ent.ac || 10);
+                        setVal('edHP', ent.maxHp || ent.hp || 10);
+                        setVal('edSpeed', ent.speed);
+                        setVal('edInit', ent.initMod || 0);
+                        setVal('edSenses', ent.senses);
+                        setVal('edLang', ent.languages);
+                        setVal('edStr', ent.str || 10);
+                        setVal('edDex', ent.dex || 10);
+                        setVal('edCon', ent.con || 10);
+                        setVal('edInt', ent.int || 10);
+                        setVal('edWis', ent.wis || 10);
+                        setVal('edCha', ent.cha || 10);
+                        setVal('edSaves', ent.saves);
+                        setVal('edSkills', ent.skills);
+                        setVal('edDmgRes', ent.dmgRes);
+                        setVal('edDmgImm', ent.dmgImm);
+                        setVal('edCondImm', ent.condImm);
+                        setVal('edFeats', ent.feats);
+                        setVal('edTraits', ent.traits);
+                        setVal('edActions', ent.actions);
+                        setVal('edReactions', ent.reactions);
+                        setVal('edLegendary', ent.legendary); 
+
+                        // Capture image if the exported file had one
+                        if (ent.img) {
+                            window._tempImportedImg = ent.img;
+                            el('edImgName').innerText = "Image loaded from import file";
+                        }
+
+                        // Trigger the Smart Fill box update
+                        if (typeof Library.generateStatblockText === 'function') {
+                            el('smartFillText').value = Library.generateStatblockText();
+                        }
+                        
+                        Utils.toast("Statblock Imported!");
+                    } catch (err) {
+                        Utils.toast("Error: Invalid statblock file");
+                    }
+                    fileInput.value = ""; // Reset input so you can load the same file again if needed
+                };
+                reader.readAsText(file);
+            },
+
             saveEntity: () => {
                 const el = (id) => document.getElementById(id);
                 const type = el('edType').value;
@@ -2063,11 +2154,16 @@ Armor Class 14 (studded leather)
                     el('editorModal').classList.remove('open');
                     Utils.toast("Entity Saved!");
                 };
+                
                 if (fileInput.files && fileInput.files[0]) {
                     const reader = new FileReader();
                     reader.onload = (e) => { newData.img = e.target.result; finishSave(); };
                     reader.readAsDataURL(fileInput.files[0]);
-                } else { finishSave(); }
+                } else { 
+                    // NEW: Applies the image from an imported file if one exists
+                    if (window._tempImportedImg) newData.img = window._tempImportedImg;
+                    finishSave(); 
+                }
             },
 
             switchTab: (idx) => {
@@ -2529,30 +2625,30 @@ Armor Class 14 (studded leather)
 
             library: (parent) => {
                 parent.innerHTML = `
-        <div class="layout-single panel">
-        <div class="panel-header">
-            <span class="panel-title">Library</span>
-            <div class="flex-row">
-                <button class="btn" onclick="Library.openEditor('enemies')">+ Enemy</button>
-                <button class="btn" onclick="Library.createFolder('enemies')"><i class="ph ph-folder-plus"></i> Folder</button>
-            </div>
-        </div>
-        <div class="panel-body">
-            <h3 style="margin-top:0; font-family:var(--font-header); border-bottom:1px solid #ddd; display:flex; justify-content:space-between;">
-                Enemies
-            </h3>
-            <div id="enemyContainer"></div>
+                    <div class="layout-single panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Library</span>
+                        <div class="flex-row">
+                            <button class="btn" onclick="Library.openEditor('enemies')">+ Enemy</button>
+                            <button class="btn" onclick="Library.createFolder('enemies')"><i class="ph ph-folder-plus"></i> Folder</button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <h3 style="margin-top:0; font-family:var(--font-header); border-bottom:1px solid #ddd; display:flex; justify-content:space-between;">
+                            Enemies
+                        </h3>
+                        <div id="enemyContainer"></div>
 
-            <div class="panel-header" style="margin-top:30px; border-top:1px solid #ddd; background:none; padding-left:0;">
-                <span class="panel-title">NPCs</span>
-                <div class="flex-row">
-                    <button class="btn" onclick="Library.openEditor('npcs')">+ NPC</button>
-                    <button class="btn" onclick="Library.createFolder('npcs')"><i class="ph ph-folder-plus"></i> Folder</button>
-                </div>
-            </div>
-            <div id="npcContainer"></div>
-        </div>
-    </div>`;
+                        <div class="panel-header" style="margin-top:30px; border-top:1px solid #ddd; background:none; padding-left:0;">
+                            <span class="panel-title">NPCs</span>
+                            <div class="flex-row">
+                                <button class="btn" onclick="Library.openEditor('npcs')">+ NPC</button>
+                                <button class="btn" onclick="Library.createFolder('npcs')"><i class="ph ph-folder-plus"></i> Folder</button>
+                            </div>
+                        </div>
+                        <div id="npcContainer"></div>
+                    </div>
+                </div>`;
 
                 const renderSection = (type, containerId) => {
                     const container = document.getElementById(containerId);
@@ -2693,14 +2789,14 @@ Armor Class 14 (studded leather)
 
             party: (parent) => {
                 parent.innerHTML = `
-        <div class="layout-single panel">
-            <div class="panel-header">
-                <span class="panel-title">Party Overview</span>
-                <button class="btn" onclick="document.getElementById('partyImp').click()"><i class="ph ph-upload"></i> Import JSON</button>
-                <input type="file" id="partyImp" class="hidden" multiple accept=".json" onchange="Library.importParty(this.files)">
-            </div>
-            <div class="panel-body"><div class="card-grid" id="partyGrid"></div></div>
-        </div>`;
+                <div class="layout-single panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Party Overview</span>
+                        <button class="btn" onclick="document.getElementById('partyImp').click()"><i class="ph ph-upload"></i> Import JSON</button>
+                        <input type="file" id="partyImp" class="hidden" multiple accept=".json" onchange="Library.importParty(this.files)">
+                    </div>
+                    <div class="panel-body"><div class="card-grid" id="partyGrid"></div></div>
+                </div>`;
                 const grid = document.getElementById('partyGrid');
                 if (!State.party || State.party.length === 0) { grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:50px; color:#999;">No party loaded. Import JSON files from standard 5e character sheets.</div>`; return; }
 
@@ -2741,30 +2837,30 @@ Armor Class 14 (studded leather)
 
             dice: (parent) => {
                 parent.innerHTML = `
-        <div class="layout-single panel">
-            <div class="panel-header">
-                <span class="panel-title">Dice Tray</span>
-                <div class="flex-row">
-                    <label class="text-sm">Count:</label> <input id="dCount" type="number" class="inp" value="1" style="width:50px; text-align:center;">
-                    <label class="text-sm">Mod:</label> <input id="dMod" type="number" class="inp" value="0" style="width:50px; text-align:center;">
-                    <button class="btn btn-outline" onclick="document.getElementById('rollLog').innerHTML=''">Clear Log</button>
-                </div>
-            </div>
-            <div class="panel-body">
-                <div class="dice-area">
-                    <div class="dice-row">
-                        <button class="die-btn" onclick="Render.doRoll(4)"><i class="ph ph-triangle die-val"></i><span class="die-name">d4</span></button>
-                        <button class="die-btn" onclick="Render.doRoll(6)"><i class="ph ph-cube die-val"></i><span class="die-name">d6</span></button>
-                        <button class="die-btn" onclick="Render.doRoll(8)"><i class="ph ph-diamond die-val"></i><span class="die-name">d8</span></button>
-                        <button class="die-btn" onclick="Render.doRoll(10)"><i class="ph ph-caret-down die-val"></i><span class="die-name">d10</span></button>
-                        <button class="die-btn" onclick="Render.doRoll(12)"><i class="ph ph-hexagon die-val"></i><span class="die-name">d12</span></button>
-                        <button class="die-btn" onclick="Render.doRoll(20)"><i class="ph ph-star die-val"></i><span class="die-name">d20</span></button>
-                        <button class="die-btn" onclick="Render.doRoll(100)"><i class="ph ph-circle die-val"></i><span class="die-name">d100</span></button>
-                    </div>
-                    <div id="rollLog" class="log-container"></div>
-                </div>
-            </div>
-        </div>`;
+                    <div class="layout-single panel">
+                        <div class="panel-header">
+                            <span class="panel-title">Dice Tray</span>
+                            <div class="flex-row">
+                                <label class="text-sm">Count:</label> <input id="dCount" type="number" class="inp" value="1" style="width:50px; text-align:center;">
+                                <label class="text-sm">Mod:</label> <input id="dMod" type="number" class="inp" value="0" style="width:50px; text-align:center;">
+                                <button class="btn btn-outline" onclick="document.getElementById('rollLog').innerHTML=''">Clear Log</button>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="dice-area">
+                                <div class="dice-row">
+                                    <button class="die-btn" onclick="Render.doRoll(4)"><i class="ph ph-triangle die-val"></i><span class="die-name">d4</span></button>
+                                    <button class="die-btn" onclick="Render.doRoll(6)"><i class="ph ph-cube die-val"></i><span class="die-name">d6</span></button>
+                                    <button class="die-btn" onclick="Render.doRoll(8)"><i class="ph ph-diamond die-val"></i><span class="die-name">d8</span></button>
+                                    <button class="die-btn" onclick="Render.doRoll(10)"><i class="ph ph-caret-down die-val"></i><span class="die-name">d10</span></button>
+                                    <button class="die-btn" onclick="Render.doRoll(12)"><i class="ph ph-hexagon die-val"></i><span class="die-name">d12</span></button>
+                                    <button class="die-btn" onclick="Render.doRoll(20)"><i class="ph ph-star die-val"></i><span class="die-name">d20</span></button>
+                                    <button class="die-btn" onclick="Render.doRoll(100)"><i class="ph ph-circle die-val"></i><span class="die-name">d100</span></button>
+                                </div>
+                                <div id="rollLog" class="log-container"></div>
+                            </div>
+                        </div>
+                    </div>`;
             },
             doRoll: (sides) => { const c = parseInt(document.getElementById('dCount').value) || 1; const m = parseInt(document.getElementById('dMod').value) || 0; Dice.roll(sides, c, m); },
 
